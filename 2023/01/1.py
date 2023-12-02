@@ -1,11 +1,8 @@
-# let's ignore EOF for now
-# discuss with others later
 import string
 import sys
 from itertools import dropwhile
 
 s = 0
-# while line:= input():
 while True:
     line=sys.stdin.readline().rstrip("\r\n")
     if not line:
