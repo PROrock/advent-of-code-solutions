@@ -13,7 +13,7 @@ Roughly :-) Not counting time to think, as I usually read the problem statement 
 |   7  	 |      1:13  	 | 	Part 1 took me longer than expected. Maybe too fragmented programming time? |
 |   8  	 | 2:07+      	 | 	Part 2 gave me headaches.                                                   |
 |   9  	 |      0:20  	 | 	Surprisingly easy and fast after day 08.                                    |
-|  10  	 |            	 | 	                                                                            |
+|  10  	 |      3:01  	 | 	Part 1 took me longer. Part 2 (insides) gave me hard time.                  |
 |  11  	 |            	 | 	                                                                            |
 |  12  	 |            	 | 	                                                                            |
 |  13  	 |            	 | 	                                                                            |
