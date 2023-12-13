@@ -1,5 +1,6 @@
 import re
 import sys
+from collections import deque
 
 instructions = sys.stdin.readline().rstrip("\r\n")
 # print(instructions)
@@ -131,3 +132,63 @@ while not all(n[-1] == "Z" for n in nodes):
 #     print(col)
 #     print()
 print(s)
+
+
+# search, jestli perioda 283 do cile je vzdy a u vsech podgrafu
+# pokud ano, da se napocitat nebo memo po 283, kdyz jsem na pozici x, kde budu
+
+@dataclass
+class Node:
+    name: str
+    g: int
+
+    def is_goal(self):
+        return self.name[-1] == "Z"
+
+    def expand(self):
+        instruction = instructions[s % n_instructions]
+        s += 1
+        new_node = graph[node][instruction]
+        # print(s, instruction, node, new_node)
+        node = new_node
+
+        # TODO HERE!
+        # TODO HERE!
+        # TODO HERE!
+
+        tile = get_tile(grid, self.coor)
+        dirs = dirsByTile[tile]
+        if not dirs:
+            return []
+        if self.dir_to_here is not None:
+            reverse_dir = self.dir_to_here.invert()
+            dirs = [dir for dir in dirs if dir != reverse_dir]
+
+        children = []
+        for dir in dirs:
+            new_coor = self.coor + dir
+            reverse_dir = dir.invert()
+            new_tile = get_tile(grid, new_coor)
+            new_dirs = dirsByTile[new_tile]
+            if reverse_dir in new_dirs:
+                # print(f"{self}: child {new_coor=}, {new_tile=}")
+                children.append(Node(new_coor, self.g + 1, dir))
+        return children
+
+
+def search(start_node):
+    visited = set()
+    queue = deque([Node(start_node, 0)])
+    while queue:
+        node = queue.popleft()
+        # r we finished?
+        if node.name in visited:
+            print(f"{node.name} was visited! {node}")
+        if node.is_goal():
+            print(f"{node} is goal! {len(visited)=}")
+            return None
+
+        children = node.expand()
+        queue.extend(children)
+        visited.add(node.name)
+    return -2
