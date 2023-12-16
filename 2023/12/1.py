@@ -8,11 +8,16 @@ BROKEN_PATTERN = re.compile("(#+)")
 MULTIPLE_OPERATIONAL_PATTERN = re.compile("[.]{2,}")
 # CANDIDATE_POS_PATTERN = re.compile("[.]{2,}")
 
+def debug(*strings):
+    if False:
+        print(*strings)
+
 def load_lines():
     # file = "./1.in"
     file = "./2.in"
     # file = "./2.S.in"
     # file = "./2.XS.in"
+    # file = "./3.in"
     return Path(file).read_text().splitlines()
 
 
@@ -37,7 +42,7 @@ def generate_all_combinations_list3(record, unknown_indices, n_missing_broken):
 
 
 def generate_all_combinations_list4(record, groups):
-    # print("gen", record)
+    debug("gen", record, groups)
     if len(groups):
         # first_group = groups[0]
         first_group, *rest_of_groups = groups
@@ -46,19 +51,29 @@ def generate_all_combinations_list4(record, groups):
 
         # pattern = f"([#?]{{{first_group}}})(?:[.?]|$)"
         # pattern = f"([#?]{{{first_group}}})(?!#)"
-        pattern = f"(?=([#?]{{{first_group}}})(?!#))"
-        candidate_positions = list(re.finditer(pattern, record[:end_of_window]))
-        # print(record, pattern, first_group, rest_of_groups, end_of_window, candidate_positions)
+        # pattern = f"(?=([#?]{{{first_group}}})(?!#))"
+        pattern = rf"(?<!#)(?=([#?]{{{first_group}}})(?!#))"
+        # candidate_positions = list(re.finditer(pattern, record[:end_of_window]))
+        candidate_positions = list(re.finditer(pattern, record[:end_of_window+1]))
+        debug(record, pattern, first_group, rest_of_groups, end_of_window, "candidate_starts", [c.start(1) for c in candidate_positions])
         for candidate in candidate_positions:
-            if candidate.start(1) > 0 and record[candidate.start(1)-1] == BROKEN:
-                # print(f"invalid candidate! {candidate} {candidate.start()},{candidate.start(1)}. Groups: {candidate.groups()}. Char {record[candidate.start(1)-1]} is BROKEN. in {record[candidate.start(1)-1:candidate.end(1)+1]}")
+            # if candidate.start(1) > 0 and record[candidate.start(1)-1] == BROKEN:
+            if BROKEN in record[:candidate.start(1)]:
+                debug(f"invalid candidate! {candidate.start(1)}. Groups: {candidate.groups()}. Previous chars {record[:candidate.start(1)]} contains BROKEN. candidate: {record[candidate.start(1):candidate.end(1)]}")
+                continue
+            if candidate.start(1) + first_group > end_of_window:
+                debug(f"invalid candidate! too far. {candidate} {candidate.start(1)}. {candidate.start(1) + first_group}>{end_of_window}")
                 continue
             # print(candidate, candidate.end(), candidate.end(1))
             yield from generate_all_combinations_list4(record[candidate.end(1)+1:], groups[1:])
             # print("try 2d option")
     else:
-        # print("yielding", record)
-        yield record  # maybe 1 would be sufficient?
+        if BROKEN in record:
+            debug(f"invalid, all groups satisfied, but still some BROKEN chars left in record...")
+            pass
+        else:
+            debug("yielding", record)
+            yield record  # maybe 1 would be sufficient?
 
 
 def is_valid(record, groups):
@@ -97,7 +112,7 @@ def get_n_combinations(record, groups):
         s += 1
         # if is_valid(generated_record, groups):
         #     s += 1
-        # print(f"{generated_record} is valid, {s=}")
+        debug(f"{generated_record} is valid, {s=}")
     return s
 
 
@@ -127,11 +142,13 @@ for line in lines:
     record = simplify(record)
 
     groups = [int(i) for i in groups.split(",")]
-    print(record, groups)
+    # print(record, groups)
 
     number = get_n_combinations(record, groups)
-    # print(record, groups, number)
-    # print()
+    print(record, groups, number)
+    debug()
     s += number
 
 print(s)
+
+# 9049 is too high
