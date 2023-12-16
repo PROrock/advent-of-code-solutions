@@ -1,6 +1,6 @@
 import re
 import sys
-from collections import deque
+from functools import lru_cache
 
 instructions = sys.stdin.readline().rstrip("\r\n")
 # print(instructions)
@@ -25,28 +25,6 @@ while True:
     # for tn in graph[n]:
     #     print(f"\"{n}\" -> \"{tn}\";")
 # print()
-# sys.exit(1)
-
-
-s = 0
-nodes = [n for n in graph if n[-1] == "A"]
-# print(nodes)
-# print(f"{len(nodes)=}")
-# terminal_nodes = [n for n in graph if n[-1] == 'Z']
-# print(f"{len(terminal_nodes)}, {terminal_nodes=}")
-history = []
-history.append(nodes)
-# counter
-# s< 1000 and
-# while not all([n[-1] == "Z" for n in nodes]):
-#     instruction = instructions[s % n_instructions]
-#     s += 1
-#
-#     new_nodes = [graph[node][instruction] for node in nodes]
-#     z_nodes = [n for n in nodes if n[-1] == "Z"]
-#     print(s, instruction, nodes, new_nodes, len(z_nodes), z_nodes)
-#     # history.append(new_nodes)
-#     nodes = new_nodes
 
 
 # find first terminal node, go that steps in all other nodes and check if we are there
@@ -68,127 +46,152 @@ def move_by_steps(nodes, s, n_steps):
         instruction = instructions[s % n_instructions]
         s += 1
         nodes = [graph[node][instruction] for node in nodes]
-    return nodes
+    return nodes, s
 
-s = 0
-# n_steps, terminal_node = find_first_terminal_node(nodes[0])
-# print(n_steps, terminal_node)
-# new_steps_rest = move_other_by_steps(nodes[1:], n_steps)
-# print(new_steps_rest)
-# if all([n[-1] == "Z" for n in new_steps_rest]):
-#     # finito
-#     s+=n_steps
-#     print(s)
-#     sys.exit(1)
-# else:
-#     print("repeat is needed")
 
-for n in nodes:
-    s=0
-    for i in range(25):
+def move_by_steps_without_checking():
+    s = 0
+    nodes = [n for n in graph if n[-1] == "A"]
+    for n in nodes:
         n_steps, terminal_node = find_first_terminal_node(n, s)
-        s += n_steps
-        print(n_steps, s, terminal_node, s % n_instructions, n_instructions)
-        moved = move_by_steps([n], s, 1)
-        n = moved[0]
-        s += 1
-        print(n_steps, s, terminal_node, s % n_instructions, n_instructions)
-
-sys.exit(1)
-
-
-for n in nodes:
-    n_steps, terminal_node = find_first_terminal_node(n, s)
-    print(n_steps, terminal_node)
-
-new_steps_rest = move_by_steps(nodes[:-1], s, n_steps)
-# print(new_steps_rest)
-new_nodes = [*new_steps_rest, terminal_node]
-nodes = new_nodes
-print(nodes)
-
-while not all(n[-1] == "Z" for n in nodes):
-    # print("repeat is needed")
-    s += n_steps
-    print(s, n_steps, nodes)
-    nodes = move_by_steps(nodes, s, 1)
-    s += 1
-
-    n_steps, terminal_node = find_first_terminal_node(nodes[-1], s)
-    # print(n_steps, terminal_node)
-    # todo less effective but stats!
-    # for n in nodes:
-    #     n_steps, terminal_node = find_first_terminal_node(n, s)
-    #     print(n_steps, terminal_node)
-
-    new_steps_rest = move_by_steps(nodes[:-1], s, n_steps)
+        print(n_steps, terminal_node)
+    new_steps_rest, s = move_by_steps(nodes[:-1], s, n_steps)
+    # print(new_steps_rest)
     new_nodes = [*new_steps_rest, terminal_node]
     nodes = new_nodes
-    # print(nodes)
+    print(nodes)
+    # s += n_steps
+    while not all(n[-1] == "Z" for n in nodes):
+        # print("repeat is needed")
+        print(s, n_steps, nodes)
+        nodes, s = move_by_steps(nodes, s, 1)
+        # s += 1
 
+        n_steps, terminal_node = find_first_terminal_node(nodes[-1], s)
+        # print(n_steps, terminal_node)
+        # todo less effective but stats!
+        # for n in nodes:
+        #     n_steps, terminal_node = find_first_terminal_node(n, s)
+        #     print(n_steps, terminal_node)
 
+        new_steps_rest, s = move_by_steps(nodes[:-1], s, n_steps)
+        new_nodes = [*new_steps_rest, terminal_node]
+        nodes = new_nodes
+        # print(nodes)
+        # s += n_steps
+    print(s)
 
-# for col in zip(*history):
-#     print(col)
-#     print()
-print(s)
+# move_by_steps_without_checking()
 
-
-# search, jestli perioda 283 do cile je vzdy a u vsech podgrafu
-# pokud ano, da se napocitat nebo memo po 283, kdyz jsem na pozici x, kde budu
-
-@dataclass
-class Node:
-    name: str
-    g: int
-
-    def is_goal(self):
-        return self.name[-1] == "Z"
-
-    def expand(self):
+@lru_cache(maxsize=None)
+def move_by_steps_inner(node, instruction_idx, n_steps):
+    print(f"Node {node}, idx {instruction_idx} cache miss")
+    s = instruction_idx
+    for _ in range(n_steps):
         instruction = instructions[s % n_instructions]
         s += 1
-        new_node = graph[node][instruction]
-        # print(s, instruction, node, new_node)
-        node = new_node
-
-        # TODO HERE!
-        # TODO HERE!
-        # TODO HERE!
-
-        tile = get_tile(grid, self.coor)
-        dirs = dirsByTile[tile]
-        if not dirs:
-            return []
-        if self.dir_to_here is not None:
-            reverse_dir = self.dir_to_here.invert()
-            dirs = [dir for dir in dirs if dir != reverse_dir]
-
-        children = []
-        for dir in dirs:
-            new_coor = self.coor + dir
-            reverse_dir = dir.invert()
-            new_tile = get_tile(grid, new_coor)
-            new_dirs = dirsByTile[new_tile]
-            if reverse_dir in new_dirs:
-                # print(f"{self}: child {new_coor=}, {new_tile=}")
-                children.append(Node(new_coor, self.g + 1, dir))
-        return children
+        node = graph[node][instruction]
+    return node
 
 
-def search(start_node):
-    visited = set()
-    queue = deque([Node(start_node, 0)])
-    while queue:
-        node = queue.popleft()
-        # r we finished?
-        if node.name in visited:
-            print(f"{node.name} was visited! {node}")
-        if node.is_goal():
-            print(f"{node} is goal! {len(visited)=}")
-            return None
+def move_by_steps_cached(nodes, s, n_steps):
+    new_nodes = [move_by_steps_inner(node, s%n_instructions, n_steps) for node in nodes]
+    return new_nodes, s+n_steps
 
-        children = node.expand()
-        queue.extend(children)
-        visited.add(node.name)
-    return -2
+
+# PERIOD = n_instructions
+def move_by_steps_without_checking_by_283():
+    s = 0
+    nodes = [n for n in graph if n[-1] == "A"]
+
+    nodes, s = move_by_steps(nodes, s, 1)
+    print(s, nodes)
+
+    while not all(n[-1] == "Z" for n in nodes):
+        # print("repeat is needed")
+        nodes, s = move_by_steps_cached(nodes, s, n_instructions)
+        print(s)
+        # print(s, nodes)
+
+    print(s)
+# move_by_steps_without_checking_by_283()
+
+def move_by_steps_without_checking_by_terminal_period():
+    s = 0
+    nodes = [n for n in graph if n[-1] == "A"]
+
+    nodes, s = move_by_steps(nodes, s, 1)
+    print(s, nodes)
+
+    first_node_period, terminal_node = find_first_terminal_node(nodes[0], s)
+    print(first_node_period, terminal_node)
+
+    while not all(n[-1] == "Z" for n in nodes):
+        # print("repeat is needed")
+        nodes, s = move_by_steps_cached(nodes, s, first_node_period)
+        print(s)
+        # print(s, nodes)
+
+    print(s)
+
+
+# move_by_steps_without_checking_by_terminal_period()  # still not fast enough
+
+
+####
+
+# compute periods - try 3 times the same number and divisible by 283
+# compute tha common number
+# for 2 and 3 it's 6, so its smallest common multiplier?
+
+
+def compute_periods():
+    s = 0
+    nodes = [n for n in graph if n[-1] == "A"]
+
+    nodes, s = move_by_steps(nodes, s, 1)
+    print(s, nodes)
+    start_s = s
+
+    for node in nodes:
+        s = start_s
+        history = []
+        for _ in range(3):
+            # print("find_term", node, s)
+            n_steps, terminal_node = find_first_terminal_node(node, s)
+            s += n_steps
+            # print(n_steps, n_steps%n_instructions, s, terminal_node, s % n_instructions)
+            history.append(n_steps)
+
+            moved, s = move_by_steps([terminal_node], s, 1)
+            node = moved[0]
+            # print(n_steps, s, terminal_node, s % n_instructions)
+
+        # print(history)
+        # print([h%n_instructions for h in history])
+
+        # if all([h == history[0] for h in history]) and history[0]%n_instructions==0:
+        if all([h == history[0] for h in history]):
+            yield history[0]
+        else:
+            print(f"PROBLEM with: {history=}")
+
+
+
+def smallest_common_multiplier(*numbers):
+    # naive approach, still too slow
+    # TODO try find gcd (from math) and divide by it and then combine to find scm
+    biggest_num = max(numbers)
+    print(biggest_num)
+    i = biggest_num
+    other_numbers = [num for num in numbers if num != biggest_num]
+    while not all(num%biggest_num==0 for num in other_numbers):
+        i+= biggest_num
+        # print(i)
+    return i
+
+
+periods = list(compute_periods())
+print(periods)
+
+print(smallest_common_multiplier(*periods))
