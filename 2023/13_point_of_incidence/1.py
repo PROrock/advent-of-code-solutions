@@ -17,7 +17,6 @@ def print_grid(grid):
 def split_to_patterns(lines):
     pattern = []
     for line in lines:
-        # print(f"'{line}'")
         if line:
             pattern.append(line)
         else:
@@ -51,7 +50,7 @@ lines = load_lines()
 # print_grid(lines)
 
 patterns = list(split_to_patterns(lines))
-print(f"{len(patterns)=}")
+# print(f"{len(patterns)=}")
 
 
 s = 0
@@ -61,4 +60,3 @@ for pattern in patterns:
     s += number
 
 print(s)
-# 31265

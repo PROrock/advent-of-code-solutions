@@ -15,8 +15,8 @@ Roughly :-) Not counting time to think, as I usually read the problem statement 
 |   9  	 |              0:20  	 | 	Surprisingly easy and fast after day 08.                                                                     |
 |  10  	 |              3:01  	 | 	Part 1 took me longer. Part 2 (insides) gave me hard time.                                                   |
 |  11  	 |              0:42  	 | 	Twas fine                                                                                                    |
-|  12  	 |              5h+7m  	 | 	Profiling won't solve algorithm's big complexity. I think I knew that before. Part 1 in almost 5 hours. Uff. |
-|  13  	 |              30m+  	 | 	                                                                                                             |
+|  12  	 |             5h+7m  	 | 	Profiling won't solve algorithm's big complexity. I think I knew that before. Part 1 in almost 5 hours. Uff. |
+|  13  	 |     30m+10m = 0:40  	 | 	Finely some of the easier ones (for me).                                                                     |
 |  14  	 |                    	 | 	                                                                                                             |
 |  15  	 |                    	 | 	                                                                                                             |
 |  16  	 |                    	 | 	                                                                                                             |
