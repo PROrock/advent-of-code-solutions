@@ -16,8 +16,8 @@ Roughly :-) Not counting time to think, as I usually read the problem statement 
 |  10  	 |              3:01  	 | 	Part 1 took me longer. Part 2 (insides) gave me hard time.                                                   |
 |  11  	 |              0:42  	 | 	Twas fine                                                                                                    |
 |  12  	 |             5h+7m  	 | 	Profiling won't solve algorithm's big complexity. I think I knew that before. Part 1 in almost 5 hours. Uff. |
-|  13  	 |     30m+10m = 0:40  	 | 	Finely some of the easier ones (for me).                                                                     |
-|  14  	 |                    	 | 	                                                                                                             |
+|  13  	 |    30m+10m = 0:40  	 | 	Finely some of the easier ones (for me).                                                                     |
+|  14  	 |        40m  +20m+  	 | 	                                                                                                             |
 |  15  	 |                    	 | 	                                                                                                             |
 |  16  	 |                    	 | 	                                                                                                             |
 |  17  	 |                    	 | 	                                                                                                             |
