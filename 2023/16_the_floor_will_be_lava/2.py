@@ -100,17 +100,14 @@ horizontal_starts = [(Beam(Vect(-1,y), "E"), Beam(Vect(width, y), "W")) for y in
 vertical_starts = [(Beam(Vect(x, -1), "S"), Beam(Vect(x, height), "N")) for x in range(width)]
 all_starts = [*horizontal_starts, *vertical_starts]
 all_starts = list(itertools.chain.from_iterable(all_starts))
-# print(all_starts)
 
 max_energy = 0
 for starting_beam in all_starts:
     energized_tiles = [[False] * width for _ in grid]
     starting_beams = [starting_beam]
     process_beams(starting_beams)
-    # print_bool_grid(energized_tiles)
 
     energy = sum([int(t) for line in energized_tiles for t in line])
     if energy > max_energy:
         max_energy = energy
-    # print(starting_beam, energy, max_energy)
 print(max_energy)
