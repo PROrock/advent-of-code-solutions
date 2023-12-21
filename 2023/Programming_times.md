@@ -20,7 +20,7 @@ Roughly :-) Not counting time to think, as I usually read the problem statement 
 |  14  	 |        40m  +20m+  	 | 	                                                                                                                                                         |
 |  15  	 |    5m +47m = 0:52  	 | 	Part 1 rly straight-forward.                                                                                                                             |
 |  16  	 |   58m+ 13m = 1:11  	 | 	That cheeky mirror on starting tile in Part 1! Part 2 can be optimized (now 26s). Could cross all beams leaving grid, as they will have the same energy. |
-|  17  	 |                    	 | 	                                                                                                                                                         |
+|  17  	 |     2:30 +         	 | 	Modified search in part 1 is breaking my brain.                                                                                                          |
 |  18  	 |                    	 | 	                                                                                                                                                         |
 |  19  	 |                    	 | 	                                                                                                                                                         |
 |  20  	 |                    	 | 	                                                                                                                                                         |
