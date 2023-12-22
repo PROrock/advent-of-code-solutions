@@ -22,7 +22,7 @@ Roughly :-) Not counting time to think, as I usually read the problem statement 
 |  16  	 |   58m+ 13m = 1:11  	 | 	That cheeky mirror on starting tile in Part 1! Part 2 can be optimized (now 26s). Could cross all beams leaving grid, as they will have the same energy. |
 |  17  	 |     2:30 +         	 | 	Modified search in part 1 is breaking my brain.                                                                                                          |
 |  18  	 |                    	 | 	                                                                                                                                                         |
-|  19  	 |                    	 | 	                                                                                                                                                         |
+|  19  	 |     7m+            	 | 	                                                                                                                                                         |
 |  20  	 |                    	 | 	                                                                                                                                                         |
 |  21  	 |            22m+    	 | 	Part 1 was just gluing prev "search" and "grid" code.                                                                                                   |
 |  22  	 |                    	 | 	                                                                                                                                                         |
