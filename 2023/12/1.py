@@ -43,8 +43,7 @@ def generate_all_combinations_list4(record, groups):
             # print("try 2d option")
     else:
         if BROKEN in record:
-            debug(f"invalid, all groups satisfied, but still some BROKEN chars left in record...")
-            pass
+            debug("invalid, all groups satisfied, but still some BROKEN chars left in record...")
         else:
             debug("yielding", record)
             yield record  # maybe 1 would be sufficient?
@@ -59,7 +58,6 @@ def strip_leading_operationals(record):
 
 def get_n_combinations(record, groups):
     record = list(record)
-    s = 0
     # fill first group if possible
     record, groups = fill_first_group_if_possible(record, groups)
     # repeat from the back
