@@ -1,3 +1,4 @@
+import math
 import re
 import sys
 from functools import lru_cache
@@ -178,9 +179,8 @@ def compute_periods():
 
 
 
-def smallest_common_multiplier(*numbers):
+def smallest_common_multiplier_naive(*numbers):
     # naive approach, still too slow
-    # TODO try find gcd (from math) and divide by it and then combine to find scm
     biggest_num = max(numbers)
     print(biggest_num)
     i = biggest_num
@@ -191,7 +191,26 @@ def smallest_common_multiplier(*numbers):
     return i
 
 
+def smallest_common_multiplier_for_two(a, b):
+    gcd_ = math.gcd(a, b)
+    return gcd_ * a//gcd_ * b//gcd_
+
+
+def smallest_common_multiplier(*numbers):
+    # impl. seems to be working correctly
+    result, *rest_of_numbers = numbers
+    for num in rest_of_numbers:
+        new_result = smallest_common_multiplier_for_two(result, num)
+        result = new_result
+
+    for n in numbers:
+        print(n, result%n==0)
+    return result
+
+
 periods = list(compute_periods())
 print(periods)
 
 print(smallest_common_multiplier(*periods))
+
+# 129655083671578319400 is too high

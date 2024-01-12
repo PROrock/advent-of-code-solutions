@@ -11,7 +11,7 @@ Roughly :-) Not counting time to think, as I usually read the problem statement 
 |   5  	 |              2:10  	 | Mistake in not sorting the last map. Then a bit thinking into part 2.                                                                                    |
 |   6  	 |              0:22  	 | Part 2 too easy.                                                                                                                                         |
 |   7  	 |              1:13  	 | Part 1 took me longer than expected. Maybe too fragmented programming time?                                                                              |
-|   8  	 | 2:07+7m+1:27+      	 | Part 2 gave me headaches.                                                                                                                                |
+|   8  	 | 2:07+7m+1:27+      	 | Part 2 gave me headaches.  12.1. 2345 - 005                                                                                                              |
 |   9  	 |              0:20  	 | Surprisingly easy and fast after day 08.                                                                                                                 |
 |  10  	 |              3:01  	 | Part 1 took me longer. Part 2 (insides) gave me hard time.                                                                                               |
 |  11  	 |              0:42  	 | Twas fine                                                                                                                                                |
