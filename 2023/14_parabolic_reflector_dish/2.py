@@ -20,14 +20,47 @@ def debug(*strings):
     if False:
         print(*strings)
 
+def reverse_lines_in_grid(grid):
+    return [line[::-1] for line in grid]
+
+
 # todo:
 # cycle
 # move in 1 dir
 
-def tilt_in_y_dir(grid, dir):
+# def tilt_in_y_dir(grid, dir):
+def tilt_to_west(grid):
+    new_grid = []
+    for line in grid:
+        # todo here
+        new_segments = []
+        segments = line.split(WALL)
+        for segment in segments:
+            # load = process_segments(segment, max_load)
+            n_rocks = segment.count(ROCK)
+            new_segments.append(n_rocks*[ROCK] + (len(segment)-n_rocks)*[EMPTY])
+        new_line = WALL.join(new_segments)
+        new_grid.append(new_line)
+    print()
+    print_grid(new_grid)
+    return new_grid
+
+def tilt_to_east(grid):
+    to_east_reversed = tilt_to_west(reverse_lines_in_grid(grid))
+    return reverse_lines_in_grid(to_east_reversed)
+
+# def tilt_to_
+
+def cycle_one_time(grid):
+    #north
+    transposed_grid = [tuple_ for tuple_ in zip(*grid)]
+    tilt_to_west(transposed_grid)
     # todo here
 
-
+    #west
+    #south
+    #east
+    # return
 
 def process_segments(segment, max_load):
     n_rocks = segment.count(ROCK)
