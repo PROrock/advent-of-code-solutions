@@ -162,7 +162,7 @@ def compute_periods():
             n_steps, terminal_node = find_first_terminal_node(node, s)
             s += n_steps
             # print(n_steps, n_steps%n_instructions, s, terminal_node, s % n_instructions)
-            history.append(n_steps)
+            history.append(n_steps + 1)
 
             moved, s = move_by_steps([terminal_node], s, 1)
             node = moved[0]
@@ -176,7 +176,6 @@ def compute_periods():
             yield history[0]
         else:
             print(f"PROBLEM with: {history=}")
-
 
 
 def smallest_common_multiplier_naive(*numbers):
@@ -193,7 +192,7 @@ def smallest_common_multiplier_naive(*numbers):
 
 def smallest_common_multiplier_for_two(a, b):
     gcd_ = math.gcd(a, b)
-    return gcd_ * a//gcd_ * b//gcd_
+    return a//gcd_ * b
 
 
 def smallest_common_multiplier(*numbers):
@@ -214,3 +213,18 @@ print(periods)
 print(smallest_common_multiplier(*periods))
 
 # 129655083671578319400 is too high
+# 10371555451871
+
+# def test_scm():
+#     assert smallest_common_multiplier_for_two(2, 6) == 6
+#     assert smallest_common_multiplier_for_two(3, 5) == 15
+#     assert smallest_common_multiplier_for_two(6, 15) == 30
+#     assert smallest_common_multiplier(6, 15) == 30
+#     assert smallest_common_multiplier(6, 15, 30) == 30
+#     assert smallest_common_multiplier(1, 6, 15, 30) == 30
+#     assert smallest_common_multiplier(3, 15, 30) == 30
+#     assert smallest_common_multiplier(2, 3, 5) == 30
+#     print("tests ok")
+#
+#
+# test_scm()
