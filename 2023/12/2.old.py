@@ -19,7 +19,7 @@ def load_lines():
     # file = "./1.in"
     # file = "./2.in"
     # file = "./2.S.in"
-    file = "./2.XS.in"   # 2393557
+    file = "./2.XS.in"
     # file = "./3.in"
     return Path(file).read_text().splitlines()
 
@@ -76,85 +76,6 @@ def get_n_combinations(record, groups):
         return 1
     return len(list(generate_all_combinations_list4("".join(record), groups)))
 
-def get_n_combinations_internal(record, groups):
-    print("get_n_combinations_internal", record, groups)
-
-    # if more 2+ groups, split to sub-problems
-    if len(groups) > 1:
-        # split
-        first_subgroup_len = len(groups)//2  # this can be tuned
-        first_subgroup = groups[:first_subgroup_len]
-        second_subgroup = groups[first_subgroup_len:]
-        # first_group, *rest_of_groups = groups
-        min_first_subgroup_start = sum([r+1 for r in first_subgroup])
-        # not sure with that, would be nice to unit test
-        max_first_subgroup_start = len(record) - sum([r+1 for r in second_subgroup]) + 1
-        for i_split in range(min_first_subgroup_start, max_first_subgroup_start):
-            # todo optimization - check if it makes sense (doesnt end with BROKEN/hash)
-
-            return get_n_combinations_internal(record[:i_split], first_subgroup) * get_n_combinations_internal(record[i_split:], second_subgroup)
-    # elif 1 group - compute
-    elif len(groups) == 1:
-        # compute
-        n_surely_broken = record.count(BROKEN)
-        n_missing_broken = sum(groups) - n_surely_broken
-        if n_missing_broken == record.count(UNKNOWN):
-            # print("just one option - fill all questions marks with broken")
-            return 1
-        # ?#?#? 3 is 1
-        # ??##? 3 is 2
-        # ??#?? 3 is 3
-        # ?.#?? 3 is 1
-        # ?#.#? 3 is 0
-        # ?.#?. 3 is 0
-        # ?.#?. 1 is 1
-        # ?.??. 1 is 3
-        # todo can it end with non-dot?
-        # regex based?
-        # try every position, travel forward to after dot if present, check only the new position? - PAL way! I like
-        first_broken_idx = record.find(UNKNOWN)
-        last_broken_idx = record.rfind(UNKNOWN)
-
-
-        group_len = sum(groups)
-        # pos = 0
-        overlap = 0 if first_broken_idx == -1 else (last_broken_idx-first_broken_idx + 1)
-        if overlap == group_len:
-        # overlap = (last_broken_idx-first_broken_idx+1)
-        # if overlap == group_len:
-            return 1
-
-        min_starting_pos = 0 if first_broken_idx == -1 else first_broken_idx - (group_len - overlap)
-        max_starting_pos = len(record) - group_len if first_broken_idx == -1 else last_broken_idx - (group_len - overlap)  # inclusive
-        # pos = max(0, last_broken_idx-first_broken_idx)
-        non_dot_streak = 0
-        # # todo have to start and end on first, last hash!
-        # while pos <= len(record) - group_len:
-        #     if record[pos] == OPERATIONAL:
-        #         non_dot_streak = 0
-        #         pos =
-        pos = min_starting_pos
-        while pos <= max_starting_pos:
-            if record[pos] == OPERATIONAL:
-                non_dot_streak = 0
-                # todo here
-                pos +=
-            else:
-                non_dot_streak += 1
-                pos += 1
-
-
-    else:  # 0 groups
-        print("can i get here?", record, groups)
-
-        if BROKEN in record:
-            debug("invalid, all groups satisfied, but still some BROKEN chars left in record...")
-            return 0
-        else:
-            return 1  # ok
-
-
-
 
 def fill_first_group_if_possible(record, groups):
     while groups and record and record[0] == BROKEN:
@@ -194,9 +115,3 @@ for line in lines:
     s += number
 
 print(s)
-
-
-# todo:
-# D zkusit profiler asi na netu - rekurze se vola strasne moc hodnekrat
-# zkusit rozdelit na podproblemy - kolik zpusobu pro tyto podskupiny je na tomto splitu * na tom zbyvajicim a secist pro ruzne splity.
-# pak zacit umistenim nejdelsi groupou
