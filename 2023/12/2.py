@@ -1,8 +1,9 @@
 import re
 from pathlib import Path
+from typing import List
 
 # todo vratit pak finalne na 5
-FOLD_TIMES = 4
+FOLD_TIMES = 1
 OPERATIONAL = "."
 BROKEN = "#"
 UNKNOWN = "?"
@@ -11,7 +12,7 @@ MULTIPLE_OPERATIONAL_PATTERN = re.compile("[.]{2,}")
 
 
 def debug(*strings):
-    if False:
+    if True:
         print(*strings)
 
 
@@ -19,8 +20,9 @@ def load_lines():
     # file = "./1.in"
     # file = "./2.in"
     # file = "./2.S.in"
-    file = "./2.XS.in"   # 2393557
+    file = "./2.XS.in"   # 2393557  # 21s (fold=4)  # fold=1 133, like 1s
     # file = "./3.in"
+    # file = "./4.in"
     return Path(file).read_text().splitlines()
 
 
@@ -45,11 +47,77 @@ def generate_all_combinations_list4(record, groups):
             # print("try 2d option")
     else:
         if BROKEN in record:
-            debug(f"invalid, all groups satisfied, but still some BROKEN chars left in record...")
-            pass
+            debug("invalid, all groups satisfied, but still some BROKEN chars left in record...")
+            # pass
         else:
             debug("yielding", record)
             yield record  # maybe 1 would be sufficient?
+
+
+def generate_all_combinations_list5(record, groups, offset) -> List[List[int]]:
+    debug("gen", record, groups, offset)
+    if len(groups) == 1:
+        generated = [[offset + candidate.start(1)]
+                     for candidate in _generate_valid_candidates(record, groups)
+                     if BROKEN not in record[candidate.end(1):]]
+        debug("generated last group", generated)
+        return generated
+    return _generate_all_combinations_for_more_groups(record, groups, offset)
+
+
+def _generate_all_combinations_for_more_groups(record, groups, offset) -> List[List[int]]:
+    valid_candidates = _generate_valid_candidates(record, groups)
+
+    all_possibilities = []
+    prev_subpossibilities = None
+    for candidate in valid_candidates:
+        debug("candidate", candidate, candidate.start(1), candidate.end(1))
+        if prev_subpossibilities is None:
+            subrecord_offset = candidate.end(1) + 1  # plus one for space between groups
+            curr_subpossibilities = generate_all_combinations_list5(record[subrecord_offset:], groups[1:],
+                                                                    offset + subrecord_offset)
+        else:
+            curr_subpossibilities = [subpossibility for subpossibility in prev_subpossibilities if _subpossibility_valid(subpossibility, offset + candidate.end(1))]
+
+        if not curr_subpossibilities:
+            debug("No curr_subpossibilities for candidate, groups", groups)
+            break  # no solution now -> no solution ever
+
+        curr_possibilities = [[offset + candidate.start(1), *possibility] for possibility in curr_subpossibilities]
+        debug(candidate, groups, "->", curr_possibilities)
+        all_possibilities.extend(curr_possibilities)
+        debug(all_possibilities)
+
+        prev_subpossibilities = curr_subpossibilities
+        # print("try another candidate")
+    return all_possibilities
+
+
+def _subpossibility_valid(subpossibility, prev_candidate_end):
+    return prev_candidate_end + 1 <= subpossibility[0]
+
+
+def _generate_valid_candidates(record, groups) -> List[re.Match]:
+    first_group, *rest_of_groups = groups
+    end_of_window = (len(record) - sum([r + 1 for r in rest_of_groups])) if rest_of_groups else len(record)
+
+    pattern = rf"(?<!#)(?=([#?]{{{first_group}}})(?!#))"
+    candidate_positions = list(re.finditer(pattern, record[:end_of_window + 1]))
+    debug(record, pattern, first_group, rest_of_groups, end_of_window, "candidate_starts",
+          [c.start(1) for c in candidate_positions])
+
+    valid_candidates = []
+    for candidate in candidate_positions:
+        if BROKEN in record[:candidate.start(1)]:
+            debug(
+                f"invalid candidate! {candidate.start(1)}. Groups: {candidate.groups()}. Previous chars {record[:candidate.start(1)]} contains BROKEN. candidate: {record[candidate.start(1):candidate.end(1)]}")
+            continue
+        if candidate.start(1) + first_group > end_of_window:
+            debug(
+                f"invalid candidate! too far. {candidate} {candidate.start(1)}. {candidate.start(1) + first_group}>{end_of_window}")
+            continue
+        valid_candidates.append(candidate)
+    return valid_candidates
 
 
 def strip_leading_operationals(record):
@@ -74,86 +142,8 @@ def get_n_combinations(record, groups):
     if n_missing_broken == len(unknown_indices):
         # print("just one option - fill all questions marks with broken")
         return 1
-    return len(list(generate_all_combinations_list4("".join(record), groups)))
-
-def get_n_combinations_internal(record, groups):
-    print("get_n_combinations_internal", record, groups)
-
-    # if more 2+ groups, split to sub-problems
-    if len(groups) > 1:
-        # split
-        first_subgroup_len = len(groups)//2  # this can be tuned
-        first_subgroup = groups[:first_subgroup_len]
-        second_subgroup = groups[first_subgroup_len:]
-        # first_group, *rest_of_groups = groups
-        min_first_subgroup_start = sum([r+1 for r in first_subgroup])
-        # not sure with that, would be nice to unit test
-        max_first_subgroup_start = len(record) - sum([r+1 for r in second_subgroup]) + 1
-        for i_split in range(min_first_subgroup_start, max_first_subgroup_start):
-            # todo optimization - check if it makes sense (doesnt end with BROKEN/hash)
-
-            return get_n_combinations_internal(record[:i_split], first_subgroup) * get_n_combinations_internal(record[i_split:], second_subgroup)
-    # elif 1 group - compute
-    elif len(groups) == 1:
-        # compute
-        n_surely_broken = record.count(BROKEN)
-        n_missing_broken = sum(groups) - n_surely_broken
-        if n_missing_broken == record.count(UNKNOWN):
-            # print("just one option - fill all questions marks with broken")
-            return 1
-        # ?#?#? 3 is 1
-        # ??##? 3 is 2
-        # ??#?? 3 is 3
-        # ?.#?? 3 is 1
-        # ?#.#? 3 is 0
-        # ?.#?. 3 is 0
-        # ?.#?. 1 is 1
-        # ?.??. 1 is 3
-        # todo can it end with non-dot?
-        # regex based?
-        # try every position, travel forward to after dot if present, check only the new position? - PAL way! I like
-        first_broken_idx = record.find(UNKNOWN)
-        last_broken_idx = record.rfind(UNKNOWN)
-
-
-        group_len = sum(groups)
-        # pos = 0
-        overlap = 0 if first_broken_idx == -1 else (last_broken_idx-first_broken_idx + 1)
-        if overlap == group_len:
-        # overlap = (last_broken_idx-first_broken_idx+1)
-        # if overlap == group_len:
-            return 1
-
-        min_starting_pos = 0 if first_broken_idx == -1 else first_broken_idx - (group_len - overlap)
-        max_starting_pos = len(record) - group_len if first_broken_idx == -1 else last_broken_idx - (group_len - overlap)  # inclusive
-        # pos = max(0, last_broken_idx-first_broken_idx)
-        non_dot_streak = 0
-        # # todo have to start and end on first, last hash!
-        # while pos <= len(record) - group_len:
-        #     if record[pos] == OPERATIONAL:
-        #         non_dot_streak = 0
-        #         pos =
-        pos = min_starting_pos
-        while pos <= max_starting_pos:
-            if record[pos] == OPERATIONAL:
-                non_dot_streak = 0
-                # todo here
-                pos +=
-            else:
-                non_dot_streak += 1
-                pos += 1
-
-
-    else:  # 0 groups
-        print("can i get here?", record, groups)
-
-        if BROKEN in record:
-            debug("invalid, all groups satisfied, but still some BROKEN chars left in record...")
-            return 0
-        else:
-            return 1  # ok
-
-
+    # return len(list(generate_all_combinations_list4("".join(record), groups)))
+    return len(list(generate_all_combinations_list5("".join(record), groups, 0)))
 
 
 def fill_first_group_if_possible(record, groups):
@@ -200,3 +190,8 @@ print(s)
 # D zkusit profiler asi na netu - rekurze se vola strasne moc hodnekrat
 # zkusit rozdelit na podproblemy - kolik zpusobu pro tyto podskupiny je na tomto splitu * na tom zbyvajicim a secist pro ruzne splity.
 # pak zacit umistenim nejdelsi groupou
+
+# for first group, identify min and max position and for every one generate all possibilities
+# then for another position of first group - take prev. possibilities and removes invalid ones, rest is still valid
+# todo heuristic - WITH FOLDING, NOT SO APPLICABLE! if sum of (group + 1) -1 is len record, then its only 1 possibility (if it is 100% valid before), or check validity of such solution
+# todo heuristic - if already broken streak can be only one group, start with that group?
