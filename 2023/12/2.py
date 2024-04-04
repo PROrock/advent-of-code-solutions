@@ -21,9 +21,9 @@ def load_lines():
     # file = "./1.in"
     # file = "./2.in"
     # file = "./2.S.in"
-    file = "./2.XS.in"   # 2393557  # 21s (fold=4)  # fold=1 133, like 1s
+    # file = "./2.XS.in"   # 2393557  # 21s (fold=4)  # fold=1 133, like 1s
     # file = "./3.in"
-    # file = "./4.in"  # should be 9 (3x3)
+    file = "./4.in"  # should be 5
     return Path(file).read_text().splitlines()
 
 
