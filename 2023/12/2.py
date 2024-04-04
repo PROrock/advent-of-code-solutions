@@ -20,9 +20,9 @@ def load_lines():
     # file = "./1.in"
     # file = "./2.in"
     # file = "./2.S.in"
-    file = "./2.XS.in"   # 2393557  # 21s (fold=4)  # fold=1 133, like 1s
+    # file = "./2.XS.in"   # 2393557  # 21s (fold=4)  # fold=1 133, like 1s
     # file = "./3.in"
-    # file = "./4.in"
+    file = "./4.in"  # should be 9 (3x3)
     return Path(file).read_text().splitlines()
 
 
@@ -81,7 +81,10 @@ def _generate_all_combinations_for_more_groups(record, groups, offset) -> List[L
 
         if not curr_subpossibilities:
             debug("No curr_subpossibilities for candidate, groups", groups)
-            break  # no solution now -> no solution ever
+            if all_possibilities:
+                break  # no solution now -> no solution ever
+            # TODO not so sure about this now! later can work too! after first sol is found, then it works like this!
+            # todo im not sure even about that!
 
         curr_possibilities = [[offset + candidate.start(1), *possibility] for possibility in curr_subpossibilities]
         debug(candidate, groups, "->", curr_possibilities)
