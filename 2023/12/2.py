@@ -144,8 +144,10 @@ def get_n_combinations(record, groups):
     if n_missing_broken == len(unknown_indices):
         # print("just one option - fill all questions marks with broken")
         return 1
-    # return len(list(generate_all_combinations_list4("".join(record), groups)))
-    return len(list(generate_all_combinations_list5("".join(record), groups, 0)))
+    # solutions = list(generate_all_combinations_list4("".join(record), groups))
+    solutions = list(generate_all_combinations_list5("".join(record), groups, 0))
+    debug(solutions)
+    return len(solutions)
 
 
 def fill_first_group_if_possible(record, groups):
@@ -195,5 +197,13 @@ print(s)
 
 # for first group, identify min and max position and for every one generate all possibilities
 # then for another position of first group - take prev. possibilities and removes invalid ones, rest is still valid
+
+# heuristic - generating candidates not via regex, but via "rolling window" - stop immediatelly also after we get behind hash/broken!
+# heuristic - remove space in front of for every subproblem, also if hash/broken is the first, fill the group immediatelly
+
 # todo heuristic - WITH FOLDING, NOT SO APPLICABLE! if sum of (group + 1) -1 is len record, then its only 1 possibility (if it is 100% valid before), or check validity of such solution
 # todo heuristic - if already broken streak can be only one group, start with that group?
+
+# todo debug print also uroven zanoreni k printum a to si pocitat v rekurzi?! strasne to pomuze ladeni (nebo opravdovy debug no)
+# https://stackoverflow.com/questions/12399259/finding-the-level-of-recursion-call-in-python
+# or code something like this guy: https://www.codementor.io/@dmitrybelaventsev/python-trace-recursive-function-tkq79m4so
