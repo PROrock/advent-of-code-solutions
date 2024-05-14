@@ -56,12 +56,12 @@ def generate_all_combinations_list4(record, groups):
 
 
 def generate_all_combinations_list5(record, groups, offset) -> List[List[int]]:
-    debug("gen", record, groups, offset)
+    debug(groups, "gen", record, groups, offset)
     if len(groups) == 1:
         generated = [[offset + candidate.start(1)]
                      for candidate in _generate_valid_candidates(record, groups)
                      if BROKEN not in record[candidate.end(1):]]
-        debug("generated last group", generated)
+        debug(groups, "generated last group", generated)
         return generated
     return _generate_all_combinations_for_more_groups(record, groups, offset)
 
@@ -72,7 +72,7 @@ def _generate_all_combinations_for_more_groups(record, groups, offset) -> List[L
     all_possibilities = []
     prev_subpossibilities = None
     for candidate in valid_candidates:
-        debug("candidate", candidate, candidate.start(1), candidate.end(1))
+        debug(groups, "expanding candidate", candidate, candidate.start(1), candidate.end(1), f"{prev_subpossibilities=}")
         if prev_subpossibilities is None:
             subrecord_offset = candidate.end(1) + 1  # plus one for space between groups
             curr_subpossibilities = generate_all_combinations_list5(record[subrecord_offset:], groups[1:],
@@ -81,14 +81,14 @@ def _generate_all_combinations_for_more_groups(record, groups, offset) -> List[L
             curr_subpossibilities = [subpossibility for subpossibility in prev_subpossibilities if _subpossibility_valid(subpossibility, offset + candidate.end(1))]
 
         if not curr_subpossibilities:
-            debug("No curr_subpossibilities for candidate, groups", groups)
+            debug(groups, "No curr_subpossibilities for candidate, groups", groups)
             prev_subpossibilities = None
             continue  # it can work later after first sol and second nonsol too I think
 
         curr_possibilities = [[offset + candidate.start(1), *possibility] for possibility in curr_subpossibilities]
-        debug(candidate, groups, "->", curr_possibilities)
+        debug(groups, candidate, groups, "add partial solution ->", f"{curr_possibilities=}")
         all_possibilities.extend(curr_possibilities)
-        debug(all_possibilities)
+        debug(groups, f"{all_possibilities=}")
 
         prev_subpossibilities = curr_subpossibilities
         # print("try another candidate")
@@ -204,6 +204,16 @@ print(s)
 # todo heuristic - WITH FOLDING, NOT SO APPLICABLE! if sum of (group + 1) -1 is len record, then its only 1 possibility (if it is 100% valid before), or check validity of such solution
 # todo heuristic - if already broken streak can be only one group, start with that group?
 
-# todo debug print also uroven zanoreni k printum a to si pocitat v rekurzi?! strasne to pomuze ladeni (nebo opravdovy debug no)
+# pridal jsem groups na zacatek a zatm to staci
+# debug print also uroven zanoreni k printum a to si pocitat v rekurzi?! strasne to pomuze ladeni (nebo opravdovy debug no)
 # https://stackoverflow.com/questions/12399259/finding-the-level-of-recursion-call-in-python
 # or code something like this guy: https://www.codementor.io/@dmitrybelaventsev/python-trace-recursive-function-tkq79m4so
+
+
+# todo problem je ten, ze muj super algoritmus ma diru
+#  kdyz je prvni solution [0, 3, 5] a druhy ma byt [0, 5, 7], tak mi ho nenajde - problem: ?#???#.? 2,1,1 (output ma byt 3)
+# 0,3,5
+# 0,5,7
+# 1,5,7
+# if idx is 5 or more then run the search once again?
+# IDK, I give up now. Would have to draw it probably and think about cases
