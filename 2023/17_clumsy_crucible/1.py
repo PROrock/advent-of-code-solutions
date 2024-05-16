@@ -47,7 +47,7 @@ def coor_inbounds(coor: Vect):
 
 
 @dataclass
-class Node():
+class Node:
     coor: Vect
     heat_so_far: int
     # heuristic: int
@@ -77,7 +77,6 @@ class Node():
 
     def __repr__(self):
         return f"Node({self.coor}, dir_here={self.dir_to_here}, f:{self.sort_key}, heat:{self.heat_so_far}, heur:{self.heuristic})"
-
 
     def last_three_dirs(self):
         return [self.dir_to_here, *[node.dir_to_here for node in islice(self.past_nodes(), 2)]]
@@ -135,8 +134,8 @@ def cheapest_path(start_coor: Vect, goal_coor: Vect):
     # queue = deque([Node(start_coor, 0, None)])
     while prio_queue:
         # node = heapq.heappop(prio_queue)
-        heur_value, node = prio_queue.get_nowait()
-        print("Processing", node, heur_value)
+        sort_value, node = prio_queue.get_nowait()
+        print("Processing", node, sort_value)
         if node.coor in set([past.coor for past in node.past_nodes()]):
             print(f"{node.coor} was visited! {node}")
             continue
