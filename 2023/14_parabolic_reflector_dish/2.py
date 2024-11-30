@@ -125,4 +125,6 @@ final_grid = get_final_grid(orig_grid)
 # assert [g for g, idx in grid_idx.items() if idx == final_idx][0] == final_grid
 
 print(compute_total_load(final_grid))
-# answer: 103
+# actual answer: 103
+# expected: 64 (pro 1)
+# a pak zmenit vstup (pro 2)
