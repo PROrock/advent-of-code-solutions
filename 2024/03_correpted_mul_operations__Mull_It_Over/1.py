@@ -59,9 +59,17 @@ assert process_line_2(r"mul(2,10)") == 20
 assert process_line_2(r"do()mul(2,10)") == 20
 assert process_line_2(r"don't()do()mul(2,10)") == 20
 assert process_line_2(r"don't()mul(2,10)") == 0
+assert process_line_2(r"don't()don't()mul(2,10)") == 0
 assert process_line_2(r"do()don't()mul(2,10)") == 0
+assert process_line_2(r"do()don't()mul(2,10)don't()mul(3,10)") == 0
+assert process_line_2(r"do()nul(2,10)") == 0
+assert process_line_2(r"do()mul(2,10") == 0
+assert process_line_2(r"do()mul(2.10)") == 0
+assert process_line_2(r"do()mul(210)") == 0
+assert process_line_2(r"do()mul2,10)") == 0
 
 assert process_line_2(r"mul(2,10)don't()mul(3,10)") == 20
+assert process_line_2(r"mul(2,10)don't()mul(3,10)do()") == 20
 assert process_line_2(r"mul(2,10)mul(3,10)") == 50
 assert process_line_2(r"mul(2,10)do()mul(3,10)") == 50
 assert process_line_2(r"mul(2,10)do()mul(3,10)don't()") == 50
@@ -70,6 +78,9 @@ assert process_line_2(r"mul(2,10)do()mul(3,10)do()") == 50
 assert process_line_2(r"mul(2,10)do()mul(3,10)don't()mul(4,10)") == 50
 assert process_line_2(r"mul(2,10)do()mul(3,10)do()mul(4,10)") == 90
 assert process_line_2(r"mul(2,10)do()don't()do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2(r"mul(2,10)do()don't()mul(5,100)do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2(r"mul(2,10)do()don't()mul(5,100)do()do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2(r"mul(2,10)do()don't()mul(5,100)do()do()mul(3,10)do()mul(4,10)") == 90
 print("asserts")
 print()
 
