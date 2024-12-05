@@ -1,5 +1,7 @@
 import re
 
+M_and_S = {"M", "S"}
+
 XMAS = "XMAS"
 XMAS_PAT = re.compile(r"XMAS")
 from pathlib import Path
@@ -27,37 +29,23 @@ class Vect(NamedTuple):
     def __mul__(self, multiplier):
         return Vect(self.x * multiplier, self.y * multiplier)
 
-    # def l1_dist(self, other):
-    #     return abs(self.x-other.x)+abs(self.y-other.y)
-
 def coor_inbounds(coor: Vect):
     return 0 <= coor.x < width and 0 <= coor.y < height
-
-
-def print_grid(grid):
-    print("GRID")
-    for line in grid:
-        print(line)
-    print("GRID END")
 
 
 grid = load_lines()
 height = len(grid)
 width = len(grid[0])
-
-dirs = [
-    Vect(1, 0), # hor
-    Vect(0, 1), # vert
+diags = [
     Vect(1, 1), # main diag
     Vect(1, -1), # minor diag
 ]
+dirs = [
+    Vect(1, 0), # hor
+    Vect(0, 1), # vert
+    *diags,
+]
 
-s = 0
-
-# def process_dir(dir):
-#     # hor
-#     for y in range(height):
-#         XMAS_PAT.find
 
 def count_dirs(x, y):
     s = 0
@@ -76,7 +64,7 @@ def _count_dir(x, y, dir):
     return 1
 
 
-def process_line(y, line):
+def find_xmas(y, line):
     matches = re.finditer(r"X", line)
     result = 0
     for m in matches:
@@ -84,14 +72,37 @@ def process_line(y, line):
         result += subresult
     return result
 
+def find_mas(y, line):
+    matches = re.finditer(r"A", line)
+    result = 0
+    for m in matches:
+        subresult = count_mas(m.start(), y)
+        result += subresult
+    return result
+
+def count_mas(x, y):
+    vect = Vect(x, y)
+    for dir in diags:
+        c1 = vect + dir
+        c2 = vect + (dir * -1)
+        if not coor_inbounds(c1) or not coor_inbounds(c2):
+            return 0
+        elems = {elem_at_coor(grid, c1), elem_at_coor(grid, c2)}
+        if elems != M_and_S:
+            return 0
+    return 1
+
+
+
 # print(Vect(1,2)+Vect(3,4))
 # print(Vect(1,2)*-1)
 # print(-1*Vect(1,2))
 
-# for dir in dirs:
-    # number = process_dir(dir)
+s = 0
 for y, line in enumerate(grid):
-    number = process_line(y, line)
-    # print(y, number)
+    if y == 0 or y==len(grid)-1:
+        continue
+    # number = find_xmas(y, line)
+    number = find_mas(y, line)
     s += number
 print(s)
