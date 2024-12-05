@@ -27,7 +27,7 @@ def process_line(line):
         end_idx = first_disable.start() if first_disable is not None else len(line) + 1
         subline = line[start_idx:end_idx]
         subresult = sum_muls(subline)
-        # print
+        # print()
         result+=subresult
 
         # any([(first_enable:=m) for m in enables if m.start() > end_idx])

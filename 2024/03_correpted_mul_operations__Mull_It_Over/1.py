@@ -81,6 +81,7 @@ assert process_line_2(r"mul(2,10)do()don't()do()mul(3,10)do()mul(4,10)") == 90
 assert process_line_2(r"mul(2,10)do()don't()mul(5,100)do()mul(3,10)do()mul(4,10)") == 90
 assert process_line_2(r"mul(2,10)do()don't()mul(5,100)do()do()mul(3,10)do()mul(4,10)") == 90
 assert process_line_2(r"mul(2,10)do()don't()mul(5,100)do()do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2("do()+mul(232,260)who(),who()[)+what()#[mul(972,455)mul(299,267)#}}+%% }@") == 582413
 print("asserts")
 print()
 
@@ -96,7 +97,9 @@ print(s)
 # todo del
 # 188741603 was answer for A
 # B:
-# 70553436 too high, rly (twice)
+# 70553436 too high, rly (tested three times)
 # D poslat, treba jsem to spatne prepsal
 # D check copied input radsi
 # nechal bych ulezet, at neztracim cas zatim!
+
+# muzes zkusit vystrihnout ty casti dont() az do() a pak na to pustit sum_mul jen jednou :shrug:
