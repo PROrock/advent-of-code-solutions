@@ -87,21 +87,17 @@ def n_of_visited(start_pos, start_d):
     return len(visited)
 
 
-def would_obstacle_in_front_of_loop(pos, d):
+def would_obstacle_in_front_of_loop(pos, d, obstacle_pos):
     visited_t = set()
     visited_t.add((pos, d))
 
     d = turn_right(d)
     # print(f"try_obstacle_in_front_of {pos=}, {d=}")
     while True:
-        # print(f"{pos=}, {to_symbol(d)}, {d=}")
-        # print_visited_grid(grid, visited_t)
-        # print_grid(grid)
-
         next_pos = pos + d
         if not coor_inbounds(next_pos):
             return False
-        while elem_at_coor(grid, next_pos) == "#":
+        while elem_at_coor(grid, next_pos) == "#" or next_pos == obstacle_pos:
             d = turn_right(d)
             next_pos = pos + d
             if not coor_inbounds(next_pos):
@@ -117,13 +113,11 @@ def would_obstacle_in_front_of_loop(pos, d):
 def n_of_loops(start_pos, start_d):
     pos = start_pos
     d = start_d
+    visited_pos = set()
     obstacles = set()
 
     while True:
-        # print(f"{pos=}, {to_symbol(d)}, {d=}")
-        # print_visited_grid(grid, visited)
-        # print_grid(grid)
-
+        visited_pos.add(pos)
         next_pos = pos + d
         if not coor_inbounds(next_pos):
             break
@@ -131,19 +125,15 @@ def n_of_loops(start_pos, start_d):
             d = turn_right(d)
             # lazy to update pos here
         else:
-            # skip for guard's starting position and already tried working obstacles
-            if next_pos != start_pos and next_pos not in obstacles:
-                if would_obstacle_in_front_of_loop(pos, d):
-                    # print("possible obstacle found at", next_pos, to_symbol(d), d, len(visited))
+            # skip blocking your previous path and skip already tried working obstacles
+            if next_pos not in visited_pos and next_pos not in obstacles:
+                if would_obstacle_in_front_of_loop(pos, d, next_pos):
+                    # print("possible obstacle found at", next_pos, to_symbol(d), d, len(visited_pos))
                     obstacles.add(next_pos)
             pos = next_pos
-
-    # print_visited_grid(grid, visited)
-    # print_grid(grid)
     return len(obstacles)
 
 start_pos = find_in_grid(grid, "^")
-# print("start_pos", start_pos)
 start_d = Vect(0, -1)
 
 # print(n_of_visited(start_pos, start_d))
@@ -151,3 +141,4 @@ print(n_of_loops(start_pos, start_d))
 
 # 6b: 1966 too high
 # 1891 too high
+# 1692 too low
