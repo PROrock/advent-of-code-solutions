@@ -74,10 +74,17 @@ assert process_line_2("mul(2,10)mul(3,10)") == 50
 assert process_line_2("mul(2,10)do()mul(3,10)") == 50
 assert process_line_2("mul(2,10)do()mul(3,10)don't()") == 50
 assert process_line_2("mul(2,10)do()mul(3,10)do()") == 50
+assert process_line_2("mul(2,10)do()don't()do()mul(3,10)do()") == 50
+assert process_line_2("mul(2,10)do()don't()mul(5,100)do()mul(3,10)do()") == 50
 
 assert process_line_2("mul(2,10)do()mul(3,10)don't()mul(4,10)") == 50
 assert process_line_2("mul(2,10)do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2("mul(2,10)do()mul(3,10)!@#$%^&*()_+mul(4,10)") == 90
 assert process_line_2("mul(2,10)do()don't()do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2("don't()mul(5,100)do()mul(2,10)do()do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2("don't()mul(5,100)do()mul(2,10)do()don't()mul(5,100)do()mul(3,10)do()mul(4,10)") == 90
+assert process_line_2("don't()mul(5,100)do()mul(2,10)do()don't()mul(5,100)do()mul(3,10)don't()mul(5,100)do()mul(4,10)") == 90
+assert process_line_2("don't()mul(5,100)do()mul(2,10)do()don't()mul(5,100)do()mul(3,10)don't()!@#$%^&*()___+}{|:?><mul(5,100)@#$%^&*()_+do()mul(4,10)") == 90
 assert process_line_2("mul(2,10)do()don't()mul(5,100)do()mul(3,10)do()mul(4,10)") == 90
 assert process_line_2("mul(2,10)do()don't()mul(5,100)do()do()mul(3,10)do()mul(4,10)") == 90
 assert process_line_2("mul(2,10)do()don't()mul(5,100)do()do()mul(3,10)do()mul(4,10)") == 90
@@ -99,5 +106,4 @@ print(s)
 # D poslat, treba jsem to spatne prepsal
 # D check copied input radsi
 # D nechal bych ulezet, at neztracim cas zatim!
-
-# todo muzes zkusit vystrihnout ty casti dont() az do() a pak na to pustit sum_mul jen jednou :shrug:
+# ND nebylo by uplne koser! muzes zkusit vystrihnout ty casti dont() az do() a pak na to pustit sum_mul jen jednou :shrug:
