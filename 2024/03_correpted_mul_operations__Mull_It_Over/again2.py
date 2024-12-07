@@ -15,6 +15,7 @@ def process_line(line):
     result = 0
     start_idx = 0
     segments=[]
+    matches_pos = []
     while start_idx != -1:
         end_idx = line.find("don't()", start_idx)
         if end_idx == -1:
@@ -22,7 +23,8 @@ def process_line(line):
 
         assert start_idx < end_idx
         subline = line[start_idx:end_idx]
-        subresult = sum_muls(subline)
+        subresult, matches = sum_muls(subline)
+        matches_pos.extend([(start_idx+m.start(), start_idx+m.end()) for m in matches])
         # print(start_idx, end_idx, subline, subresult)
         result += subresult
         # print(start_idx, end_idx, subresult, result)
@@ -41,23 +43,29 @@ def process_line(line):
     assert "".join(segments) == line
     print(line)
     print("".join(("E" if i%2==0 else "D")*len(s) for i, s in enumerate(segments)))
+    helper = " "*len(line)
+    for m in matches_pos:
+        # helper = helper[:m.start()] + "M"*(m.end()-m.start()) + helper[m.end():]
+        helper = helper[:m[0]] + "M"*(m[1]-m[0]) + helper[m[1]:]
+    print(helper)
+
     return result
 
 def sum_muls(line2):
     ss = 0
-    matches = mul_pat.finditer(line2)
+    matches = list(mul_pat.finditer(line2))
     # helper = " "*len(line)
     for m in matches:
         a,b = [int(i) for i in m.groups()]
         multiplication = a * b
         # assert multiplication > 0
         ss += multiplication
-        # print(ss, multiplication)
+        # print(ss, multiplication, m)
         # helper = helper[:m.start()] + "M"*(m.end()-m.start()) + helper[m.end()+1:]
 
     # print(line)
     # print(helper)
-    return ss
+    return ss, matches
 
 
 lines = load_lines()
