@@ -17,20 +17,29 @@ def process_line(line):
         if end_idx == -1:
             end_idx = len(line) + 10
 
+        assert start_idx < end_idx
         subline = line[start_idx:end_idx]
         subresult = sum_muls(subline)
-        print(start_idx, end_idx, subline, subresult)
+        # print(start_idx, end_idx, subline, subresult)
         result += subresult
 
         start_idx = line.find("do()", end_idx)
+        assert start_idx == -1 or start_idx > end_idx
     return result
 
 def sum_muls(line):
     ss = 0
-    tuples = mul_pat.findall(line)
-    for t in tuples:
-        a,b = [int(i) for i in t]
-        ss += a*b
+    matches = mul_pat.finditer(line)
+    # helper = " "*len(line)
+    for m in matches:
+        a,b = [int(i) for i in m.groups()]
+        multiplication = a * b
+        assert multiplication > 0
+        ss += multiplication
+        # helper = helper[:m.start()] + "M"*(m.end()-m.start()) + helper[m.end()+1:]
+
+    # print(line)
+    # print(helper)
     return ss
 
 
@@ -39,7 +48,7 @@ s = 0
 for line in lines:
     # number = sum_muls(line)
     number = process_line(line)
-    # print(number)
+    print(number)
     s += number
 
 print(s)
