@@ -62,14 +62,11 @@ def turn_right(d):
     return RIGHT_DIRS[(RIGHT_DIRS.index(d) + 1) % 4]
 
 
-def n_of_visited():
+def n_of_visited(start_pos, start_d):
     visited = set()
-    guard_pos = find_in_grid(grid, "^")
-    print("guard_pos", guard_pos)
-
-    pos = guard_pos
-    d = Vect(0, -1)
-    while coor_inbounds(pos):
+    pos = start_pos
+    d = start_d
+    while True:
         # print(f"{pos=}, {d=}")
         # print_visited_grid(grid, visited)
         # print_grid(grid)
@@ -80,7 +77,7 @@ def n_of_visited():
         if not coor_inbounds(next_pos):
             break
         if elem_at_coor(grid, next_pos) == "#":
-            d = RIGHT_DIRS[(RIGHT_DIRS.index(d) + 1) % 4]
+            d = turn_right(d)
             # lazy to update pos here
         else:
             pos = next_pos
@@ -117,22 +114,16 @@ def would_obstacle_in_front_of_loop(pos, d):
         visited_t.add(t)
 
 
-def n_of_loops():
-    start_pos = find_in_grid(grid, "^")
-    print("start_pos", start_pos)
-
+def n_of_loops(start_pos, start_d):
     pos = start_pos
-    # visited = set()
+    d = start_d
     obstacles = set()
 
-    d = Vect(0, -1)
     while True:
         # print(f"{pos=}, {to_symbol(d)}, {d=}")
         # print_visited_grid(grid, visited)
         # print_grid(grid)
 
-        # visited.add(pos)
-        # next
         next_pos = pos + d
         if not coor_inbounds(next_pos):
             break
@@ -151,8 +142,12 @@ def n_of_loops():
     # print_grid(grid)
     return len(obstacles)
 
-# print(n_of_visited())
-print(n_of_loops())
+start_pos = find_in_grid(grid, "^")
+# print("start_pos", start_pos)
+start_d = Vect(0, -1)
+
+# print(n_of_visited(start_pos, start_d))
+print(n_of_loops(start_pos, start_d))
 
 # 6b: 1966 too high
 # 1891 too high
