@@ -8,9 +8,9 @@ def load_lines():
     # file = "./1.a.in"
     # file = "./1.b.in"
     # file = "./1.c.in"
-    file = "./1.d.in"
+    # file = "./1.d.in"
     # file = "./1.in"
-    # file = "./2.in"
+    file = "./2.in"
     return Path(file).read_text().splitlines()
 
 def elem_at_coor(grid, coor):
@@ -45,16 +45,6 @@ def print_grid(grid):
     for line in grid:
         print(line)
     print("GRID END")
-
-
-def find_all_in_grid(grid, val):
-    r = []
-    for y, line in enumerate(grid):
-        for x, c in enumerate(line):
-            if c == val:
-                r.append(Vect(x, y))
-    return r
-
 
 DIR_TO_VECT = {
     "N": Vect(0, -1),
@@ -103,7 +93,6 @@ def create_region_map_and_areas(grid):
 
     return region_map, areas
 
-
 def x_perimeter_pass(region_map, perimeters):
     for y, line in enumerate(region_map):
         first_r = line[0]
@@ -124,40 +113,37 @@ def get_perimeters(region_map):
 def get_sides(region_map):
     sides = defaultdict(int)
     x_side_pass(region_map, sides)
-    print("sides after x pass")
-    print(sides)
+    # print("sides after x pass")
+    # print(sides)
     transposed = list(zip(*region_map))
-
-    # print("tr")
-    # print_grid(transposed)
     x_side_pass(transposed, sides)
     return sides
 
 def x_side_pass(region_map, sides):
-    # r: set of x-coors
+    # r: set of tuples (is_oi_bool, x-coor)
     prev_counted_verts=defaultdict(set)
-
     for y, line in enumerate(region_map):
         next_verts = defaultdict(set)
 
         first_r = line[0]
-        handle_diff(next_verts, prev_counted_verts, first_r, sides, x=0)
+        handle_diff(next_verts, prev_counted_verts, first_r, sides, x=0, is_oi=True)
         prev_r = first_r
         for x, r in enumerate(line):
             if r != prev_r:
-                handle_diff(next_verts, prev_counted_verts, prev_r, sides, x)
-                handle_diff(next_verts, prev_counted_verts, r, sides, x)
+                handle_diff(next_verts, prev_counted_verts, prev_r, sides, x, is_oi=False)
+                handle_diff(next_verts, prev_counted_verts, r, sides, x, is_oi=True)
                 prev_r = r
-        handle_diff(next_verts, prev_counted_verts, prev_r, sides, x=len(region_map))
+        handle_diff(next_verts, prev_counted_verts, prev_r, sides, x=len(region_map), is_oi=False)
         prev_counted_verts=next_verts
         # print(f"{next_verts=}")
+        # print(f"{sides=}")
 
-
-def handle_diff(next_verts, prev_counted_verts, r, sides, x):
-    if x not in prev_counted_verts[r]:
+def handle_diff(next_verts, prev_counted_verts, r, sides, x, is_oi):
+    #oi = outside-to-inside fence (or start of the region)
+    t = (is_oi, x)
+    if t not in prev_counted_verts[r]:
         sides[r] += 1
-    next_verts[r].add(x)
-
+    next_verts[r].add(t)
 
 # print_grid(grid)
 region_map, areas = create_region_map_and_areas(grid)
