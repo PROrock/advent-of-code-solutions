@@ -1,5 +1,15 @@
+# ideas to add:
+# change grid template
+# move to the year
+# load grid from file
+# search w/ prioQ
+
 import re
-from typing import NamedTuple
+from dataclasses import field, dataclass
+from typing import NamedTuple, Any
+
+from utils import replace_in_str_from
+
 
 # todo load grid from file
 
@@ -43,7 +53,6 @@ def print_grid_str(grid):
         print("".join([str(c) for c in line]))
     print("GRID END")
 
-
 def find_all_in_grid(grid, val):
     r = []
     for y, line in enumerate(grid):
@@ -66,6 +75,12 @@ DIR_TO_VECT = {
     "W": Vect(-1, 0),
 }
 VECTS_CLOCKWISE = list(DIR_TO_VECT.values())
+ARR_TO_VECT = {
+    "^": Vect(0, -1),
+    ">": Vect(1, 0),
+    "v": Vect(0, 1),
+    "<": Vect(-1, 0),
+}
 
 def expand(node, grid, level):
     children = []
@@ -80,4 +95,19 @@ def create_grid(height, width, init_value="."):
     for _ in range(height):
         grid.append([init_value for _ in range(width)])
     return grid
+
+def fill_grid(grid, coors, value):
+    for c in coors:
+        grid[c.y][c.x] = value
+    return grid
+
+def fill_grid_str(grid, coors, value):
+    for c in coors:
+        grid[c.y] = replace_in_str_from(grid[c.y], c.x, value)
+    return grid
+
+@dataclass(order=True)
+class PrioritizedItem:
+    priority: int
+    item: Any=field(compare=False)
 
