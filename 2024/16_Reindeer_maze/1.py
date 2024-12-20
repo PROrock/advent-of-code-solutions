@@ -3,8 +3,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import NamedTuple, Optional, Any
 
-# from grid_utils import fill_grid_str
-
 TURN_SCORE = 1000
 EMPTY_SPACE = "."
 WALL = "#"

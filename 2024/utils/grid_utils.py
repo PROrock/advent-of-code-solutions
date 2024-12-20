@@ -8,7 +8,7 @@ import re
 from dataclasses import field, dataclass
 from typing import NamedTuple, Any
 
-from utils import replace_in_str_from
+from utils.utils import replace_in_str_from
 
 
 # todo load grid from file

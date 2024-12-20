@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-from grid_utils import print_grid, print_grid_str, Vect, elem_at_coor, find_all_in_grid
+from utils.grid_utils import print_grid, print_grid_str, Vect, elem_at_coor, find_all_in_grid
 
 EMPTY = "."
 BOX = "O"
