@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-from utils.grid_utils import print_grid, print_grid_str, Vect, elem_at_coor, find_all_in_grid
+from utils.grid_utils import print_grid, print_grid_str, Vect, elem_at_pos, find_all_in_grid, ARR_TO_VECT
 
 EMPTY = "."
 BOX = "O"
@@ -18,26 +18,12 @@ def load_lines():
     # file = "./2.in"
     return Path(file).read_text().splitlines()
 
-
-def coor_inbounds(coor: Vect):
-    return 0 <= coor.x < width and 0 <= coor.y < height
-
-
-DIR_TO_VECT = {
-    "^": Vect(0, -1),
-    ">": Vect(1, 0),
-    "v": Vect(0, 1),
-    "<": Vect(-1, 0),
-}
-DIRS_CLOCKWISE = list(DIR_TO_VECT.values())
-
 TWICE_MAP = {
     "#": "##",
     "O": "[]",
     ".": "..",
     "@": "@.",
 }
-
 
 def twice_map(grid):
     # return ["".join([TWICE_MAP[c] for c in line]) for line in grid]
@@ -104,10 +90,10 @@ class State:
         pass
 
     def process_instruction(self, instruction):
-        dir = DIR_TO_VECT[instruction]
+        dir = ARR_TO_VECT[instruction]
         new_pos = self.pos + dir
         new_robot_pos = self.pos + dir
-        elem = elem_at_coor(self.grid, new_pos)
+        elem = elem_at_pos(self.grid, new_pos)
         first_box = None
         while True:
             if elem == EMPTY:
@@ -143,7 +129,7 @@ class State:
                 print(f"ERR: Unknown element '{elem}'")
 
             new_pos += dir
-            elem = elem_at_coor(self.grid, new_pos)
+            elem = elem_at_pos(self.grid, new_pos)
 
 
 def process_instructions(grid, instructions):

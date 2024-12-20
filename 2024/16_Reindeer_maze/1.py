@@ -1,7 +1,9 @@
 import queue
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple, Optional, Any
+from typing import Optional
+
+from utils.grid_utils import DIRS_CLOCKWISE, DIR_TO_VECT, elem_at_pos, find_one_in_grid, PrioritizedItem, Vect
 
 TURN_SCORE = 1000
 EMPTY_SPACE = "."
@@ -13,56 +15,8 @@ def load_lines():
     file = "./2.in"
     return Path(file).read_text().splitlines()
 
-def elem_at_coor(grid, coor):
-    return grid[coor.y][coor.x]
-
-class Vect(NamedTuple):
-    x: int
-    y: int
-
-    def invert(self):
-        return Vect(-self.x, -self.y)
-
-    def __add__(self, other):
-        return Vect(self.x + other.x, self.y + other.y)
-
-    def __sub__(self, other):
-        return Vect(self.x - other.x, self.y - other.y)
-
-    def __mul__(self, multiplier):
-        return Vect(self.x * multiplier, self.y * multiplier)
-
 def coor_inbounds(coor: Vect):
     return 0 <= coor.x < width and 0 <= coor.y < height
-
-def print_grid(grid):
-    print("GRID")
-    for line in grid:
-        print(line)
-    print("GRID END")
-
-def find_all_in_grid(grid, val):
-    r = []
-    for y, line in enumerate(grid):
-        for x, c in enumerate(line):
-            if c == val:
-                r.append(Vect(x, y))
-    return r
-
-DIR_TO_VECT = {
-    "N": Vect(0, -1),
-    "E": Vect(1, 0),
-    "S": Vect(0, 1),
-    "W": Vect(-1, 0),
-}
-VECTS_CLOCKWISE = list(DIR_TO_VECT.values())
-DIRS_CLOCKWISE = list(DIR_TO_VECT.keys())
-
-# todo to utils
-@dataclass(order=True)
-class PrioritizedItem:
-    priority: int
-    item: Any=field(compare=False)
 
 @dataclass(frozen=True)
 class State:
@@ -88,11 +42,10 @@ class Node:
 
     def expand(self):
         children = []
-        # go forward
-        # todo go allthe way?
+        # go forward (1 step only)
         dir_vect = DIR_TO_VECT[self.facing]
         new_coor = self.coor + dir_vect
-        if elem_at_coor(grid, new_coor) != WALL:
+        if elem_at_pos(grid, new_coor) != WALL:
             children.append(Node.create(new_coor, self.facing, self.score + 1, self))
 
         # turn L/R
@@ -120,26 +73,26 @@ height = len(grid)
 width = len(grid[0])
 
 
-# def search_score(start_node):
-#     visited_states = set()
-#     prio_queue = queue.PriorityQueue()
-#     start_node = Node.create(start_node, "E", 0)
-#     prio_queue.put_nowait((start_node.score, start_node))
-#     while prio_queue:
-#         _, node = prio_queue.get_nowait()
-#         if node.coor == end_node:
-#             print("Found end")
-#             return node.score
-#
-#         if node.state in visited_states:
-#             # print(f"{node.state} was already visited! {node}")
-#             continue
-#
-#         children = node.expand()
-#         for c in children:
-#             prio_queue.put_nowait((c.score, c))
-#         visited_states.add(node.state)
-#     return "not found"
+def search_score(start_node):
+    visited_states = set()
+    prio_queue = queue.PriorityQueue()
+    start_node = Node.create(start_node, "E", 0)
+    prio_queue.put_nowait((start_node.score, start_node))
+    while prio_queue:
+        _, node = prio_queue.get_nowait()
+        if node.coor == end_node:
+            print("Found end")
+            return node.score
+
+        if node.state in visited_states:
+            # print(f"{node.state} was already visited! {node}")
+            continue
+
+        children = node.expand()
+        for c in children:
+            prio_queue.put_nowait((c.score, c))
+        visited_states.add(node.state)
+    return "not found"
 
 def search_best_coors(start_node):
     best_score_for_state = {}
@@ -181,9 +134,8 @@ def search_best_coors(start_node):
     return len(best_coors)
 
 
-start_node = find_all_in_grid(grid, "S")[0]
-end_node = find_all_in_grid(grid, "E")[0]
-# print(end_node)
+start_node = find_one_in_grid(grid, "S")
+end_node = find_one_in_grid(grid, "E")
 
 # print(search_score(start_node))
 print(search_best_coors(start_node))

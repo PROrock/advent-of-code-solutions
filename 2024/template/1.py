@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from utils.utils import ints
+
 
 def load_lines():
     file = "./1.in"
