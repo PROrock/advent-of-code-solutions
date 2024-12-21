@@ -47,6 +47,9 @@ def elem_at_pos(grid: List[Any], pos: Vect):
 def inbounds(grid: List[Any], pos: Vect):
     return 0 <= pos.x < len(grid[0]) and 0 <= pos.y < len(grid)
 
+def inbounds_wh(pos: Vect, width: int, height: int):
+    return 0 <= pos.x < width and 0 <= pos.y < height
+
 
 def print_grid(grid):
     print("GRID")
@@ -133,13 +136,13 @@ def create_grid(height, width, init_value=EMPTY):
     return grid
 
 
-def fill_grid(grid, coors, value):
+def fill_grid(grid, coors, value="O"):
     for c in coors:
         grid[c.y][c.x] = value
     return grid
 
 
-def fill_grid_str(grid, coors, value):
+def fill_grid_str(grid, coors, value="O"):
     for c in coors:
         grid[c.y] = replace_in_str_from(grid[c.y], c.x, value)
     return grid
