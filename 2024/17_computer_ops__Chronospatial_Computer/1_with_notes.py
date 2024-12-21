@@ -73,7 +73,6 @@ class Computer:
 
             # part b
             # print("o", self.output, self.program)
-            # todo
             # if operation == 5:
             #     if not self.check_copy():
             #         self.output = None
