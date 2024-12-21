@@ -6,8 +6,10 @@ from dataclasses import dataclass
 from utils.grid_utils import DIRS_CLOCKWISE, DIR_TO_VECT, elem_at_pos, find_one_in_grid, inbounds, PrioritizedItem, \
     Vect, load_grid_str, VECTS_CLOCKWISE, inbounds_wh, WALL, fill_grid, print_grid_str, fill_grid_str
 
-# todo
-# THRES = 1
+CHEAT_S = 20
+
+# THRES = 1  #part a
+# THRES = 50
 THRES = 100
 def load_grid():
     # file = "./1.in"
@@ -40,15 +42,6 @@ class Node:
                 children.append(Node.create(new_pos, self.time + 1, self))
         return children
 
-    def pos_path(self):
-        node = self
-        path = []
-        while node.prev_node is not None:
-            path.append(node.pos)
-            node = node.prev_node
-        path.append(node.pos)
-        return list(reversed(path))
-
     def node_path(self):
         node = self
         path = []
@@ -58,15 +51,11 @@ class Node:
         path.append(node)
         return list(reversed(path))
 
-    def node_to_time(self):
-        node = self
-        ntt = {}
-        while node.prev_node is not None:
-            ntt[node.pos] = node.time
-            node = node.prev_node
-        ntt[node.pos] = node.time
-        return ntt
+    def pos_path(self):
+        return [node.pos for node in self.node_path()]
 
+    def node_to_time(self):
+        return {node.pos:node.time for node in self.node_path()}
 
 def search_normal(start_pos, end_pos) -> Optional[Node]:
     visited_states = set()
@@ -96,6 +85,17 @@ def fill_cheats(node, cheats):
                 if saved > 0:
                     cheats[saved].append((node.pos, snd_pos))
 
+def fill_cheats_b(node, cheats, possible_c_ends):
+    # because u cheat and ignore walls, you just have to consider a circle around the pos, up to radius 19/20 (and it doesnt matter the path, its counted once anyway)
+    # or u go the other way around and check every path node/pos from curr_time + THRES if it is in the radius!
+    # nice to have: maybe some 2d fast query (like kd trees) would speed this up to only check the radius
+    for poss_e in possible_c_ends:
+        dist = poss_e.pos.l1_dist(node.pos)
+        if dist <= CHEAT_S:
+            saved = poss_e.time-(node.time+dist)
+            if saved >= THRES: # always now with the correct params?
+                cheats[saved].append((node.pos, poss_e.pos))
+
 grid = load_grid()
 height = len(grid)
 width = len(grid[0])
@@ -112,16 +112,21 @@ print(len(path))
 ntt = last_node.node_to_time()
 cheats = defaultdict(list)  # save -> tuple[cheat_s, cheat_e]
 
-# search_cheating(start_pos, end_pos)
-for node in last_node.node_path():
-    fill_cheats(node, cheats)
-# print(cheats)
+# part_a
+# for node in last_node.node_path():
+#     fill_cheats(node, cheats)
+
+nodes_path = last_node.node_path()
+possible_c_ends = nodes_path[THRES:]
+# last THRES nodes cannot save at least THRES time
+for node in nodes_path[:-THRES]:
+    fill_cheats_b(node, cheats, possible_c_ends)
+    possible_c_ends = possible_c_ends[1:]
 # pprint(cheats)
 
 s = 0
 for saved, cheat_tuples in cheats.items():
     # print(saved, len(cheat_tuples))
     if saved >= THRES:
-        s+= len(cheat_tuples)
+        s+= len(set(cheat_tuples))
 print(s)
-

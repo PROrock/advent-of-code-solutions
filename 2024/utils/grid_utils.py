@@ -30,6 +30,9 @@ class Vect(NamedTuple):
     def __mul__(self, multiplier):
         return Vect(self.x * multiplier, self.y * multiplier)
 
+    def l1_dist(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
     def l2_dist(self, other):
         result_vect = other - self
         return math.hypot(result_vect)
