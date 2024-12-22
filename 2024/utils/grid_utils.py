@@ -53,15 +53,13 @@ def inbounds(grid: List[Any], pos: Vect):
 def inbounds_wh(pos: Vect, width: int, height: int):
     return 0 <= pos.x < width and 0 <= pos.y < height
 
-
-def print_grid(grid):
+def print_grid_raw(grid):
     print("GRID")
     for line in grid:
         print(line)
     print("GRID END")
 
-
-def print_grid_str(grid):
+def print_grid(grid):
     print("GRID")
     for line in grid:
         print("".join([str(c) for c in line]))

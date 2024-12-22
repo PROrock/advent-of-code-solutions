@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-from utils.grid_utils import print_grid, print_grid_str, Vect, elem_at_pos, find_all_in_grid, ARR_TO_VECT, \
+from utils.grid_utils import print_grid_raw, print_grid, Vect, elem_at_pos, find_all_in_grid, ARR_TO_VECT, \
     fill_grid_str, find_one_in_grid, fill_grid
 
 EMPTY = "."
@@ -49,7 +49,7 @@ empty_line_idx = lines.index("")
 grid = lines[:empty_line_idx]
 # part b
 grid = twice_map(grid)
-print_grid_str(grid)
+print_grid(grid)
 
 boxes_list = find_all_in_grid(grid, "[")
 grid = fill_grid(grid, boxes_list, ".")
@@ -65,7 +65,7 @@ print(boxes)
 instructions = "".join(lines[empty_line_idx + 1:])
 height = len(grid)
 width = len(grid[0])
-print_grid_str(grid)
+print_grid(grid)
 print(instructions)
 
 
@@ -257,7 +257,7 @@ def gps(boxes):
 
 fgrid = process_instructions(grid, instructions).grid
 fill_grid(fgrid, boxes, "[")
-print_grid_str(fgrid)
+print_grid(fgrid)
 # a
 # boxes = find_all_in_grid(grid, BOX)
 # print(boxes)

@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from utils.grid_utils import Vect, create_grid, WALL, VECTS_CLOCKWISE, inbounds, elem_at_pos, DIR_TO_VECT, inbounds_wh, \
-    fill_grid, print_grid, print_grid_str
+from utils.grid_utils import Vect, VECTS_CLOCKWISE, inbounds_wh
 
 # small = True
 small = False

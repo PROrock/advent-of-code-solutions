@@ -1,10 +1,8 @@
 from collections import deque, defaultdict
-from pathlib import Path
-from pprint import pprint
-from typing import Any, List, Optional
 from dataclasses import dataclass
-from utils.grid_utils import DIRS_CLOCKWISE, DIR_TO_VECT, elem_at_pos, find_one_in_grid, inbounds, PrioritizedItem, \
-    Vect, load_grid_str, VECTS_CLOCKWISE, inbounds_wh, WALL, fill_grid, print_grid_str, fill_grid_str
+from typing import Optional
+
+from utils.grid_utils import elem_at_pos, find_one_in_grid, inbounds, Vect, load_grid_str, VECTS_CLOCKWISE, WALL
 
 CHEAT_S = 20
 
