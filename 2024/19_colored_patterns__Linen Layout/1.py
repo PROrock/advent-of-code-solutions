@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 
@@ -7,19 +8,8 @@ def load_lines():
     return Path(file).read_text().splitlines()
 
 END = "$"
-# class Node:
-#
-# class Trie:
-#
-#     @staticmethod
-#     def create(patterns):
-#
 
-# def check(goal):
-#     ms = list(pat.finditer(goal))
-#     for m in ms:
-#         print(m)
-
+@lru_cache(maxsize=None)
 def check(goal):
     # print("check", goal)
     if goal=="":
@@ -86,6 +76,7 @@ def gen_matching(trie, query):
 
 
 t = create(patterns)
+# t = {}
 print(t)
 # 1/0
 
