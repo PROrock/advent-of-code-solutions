@@ -1,4 +1,5 @@
 # ideas to add:
+#  class Trie from 2024 day 19 (how to subclass dict?)
 
 import re
 
