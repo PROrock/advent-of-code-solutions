@@ -17,3 +17,7 @@ def split_lines_on_empty_line(lines):
 def ints(s):
     return [int(i) for i in INT_PAT.findall(s)]
 
+def argmax(iterable):
+    return max(enumerate(iterable), key=lambda t:t[1])[0]
+def argmin(iterable):
+    return min(enumerate(iterable), key=lambda t:t[1])[0]
