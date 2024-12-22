@@ -5,11 +5,6 @@ from typing import List, Optional
 
 from utils.grid_utils import print_grid, Vect, elem_at_pos, find_all_in_grid, ARR_TO_VECT, \
     find_one_in_grid, fill_grid
-from utils.utils import replace_in_str_from
-
-# ideas to improve:
-#  - copy process_y and from it create process_both, maybe even create general get_boxes_to_move for both x and y (they differ only in num of pos to check?)
-#  - maybe using can_move_in_dir_function, which is the single place where checking of WALL is and using x and y-specific recursive functions for getting boxes to move
 
 EMPTY = "."
 BOX = "O"
@@ -33,6 +28,7 @@ TWICE_MAP = {
 }
 
 def twice_map(grid):
+    # return ["".join([TWICE_MAP[c] for c in line]) for line in grid]
     new_grid = [[list(TWICE_MAP[c]) for c in line] for line in grid]
     new_grid = [list(itertools.chain.from_iterable(line)) for line in new_grid]
     return new_grid
@@ -78,31 +74,34 @@ class State:
     grid: List[List[str]]
     pos: Vect
 
-    def process_instruction_a(self, instruction):
-        dir = ARR_TO_VECT[instruction]
-        new_pos = self.pos + dir
-        elem = elem_at_pos(self.grid, new_pos)
-        first_box = None
-        while True:
-            if elem == EMPTY:
-                if first_box is not None:
-                    self.grid[new_pos.y] = replace_in_str_from(self.grid[new_pos.y], BOX, new_pos.x)
-                    self.grid[first_box.y] = replace_in_str_from((self.grid[first_box.y], EMPTY, first_box.x)
-                    # self.grid[new_pos.y][new_pos.x] = "0"
-                    # self.grid[first_box.y][first_box.x] = "."
-                self.pos += dir
-                break
-            elif elem == BOX:
-                if first_box is None:
-                    first_box = new_pos
-            elif elem == "#":
-                break  # cannot move, ignore instruction
-            else:
-                print("ERROR")
-                1/0
-
-            new_pos += dir
-            elem = elem_at_pos(self.grid, new_pos)
+    # def process_instruction_a(self, instruction):
+    #     dir = DIR_TO_VECT[instruction]
+    #     new_pos = self.pos + dir
+    #     elem = elem_at_coor(self.grid, new_pos)
+    #     # if elem == "#"
+    #     first_box = None
+    #     while True:
+    #         if elem == EMPTY:
+    #             if first_box is not None:
+    #                 self.grid[new_pos.y] = replace(self.grid[new_pos.y], BOX, new_pos.x)
+    #                 self.grid[first_box.y] = replace(self.grid[first_box.y], EMPTY, first_box.x)
+    #                 # self.grid[new_pos.y][new_pos.x] = "0"
+    #                 # self.grid[first_box.y][first_box.x] = "."
+    #             self.pos += dir
+    #             break
+    #         elif elem == BOX:
+    #             if first_box is None:
+    #                 first_box = new_pos
+    #         elif elem == "#":
+    #             # cannot move, ignore instruction
+    #             break
+    #         else:
+    #             print("ERROR")
+    #             print("ERROR")
+    #             print("ERROR")
+    #
+    #         new_pos += dir
+    #         elem = elem_at_coor(self.grid, new_pos)
 
     def get_boxes_to_move_y(self, box_pos, dir) -> Optional[List[Vect]]:
         assert box_pos in boxes and snd_v(box_pos) in boxes
@@ -118,12 +117,17 @@ class State:
                 boxes_to_move = self.get_boxes_to_move_y(boxes[box_coll_pos], dir)
                 if boxes_to_move is None:
                     return None
+                # print(f"{pos=}, add {boxes_to_move=}")
                 all_boxes_to_move.extend(boxes_to_move)
+            # else pass
         return all_boxes_to_move
 
     def process_instruction(self, instruction):
         dir = ARR_TO_VECT[instruction]
         new_robot_pos = self.pos + dir
+        # print(instruction, dir, new_robot_pos, "b:", list(boxes.keys()))
+
+        # self.process_both(dir, new_robot_pos)
         if dir.x != 0:
             self.process_x(dir, new_robot_pos)
         else:
@@ -139,10 +143,12 @@ class State:
             if box_coll_pos is None:
                 self.pos = new_robot_pos
             else:
+                # if new_pos in boxes or (new_pos + Vect(-1, 0)) in boxes:
                 boxes_to_move = self.get_boxes_to_move_y(boxes[box_coll_pos], dir)
                 if boxes_to_move is not None:
                     self.move_boxes(boxes_to_move, dir)
                     self.pos = new_robot_pos
+            # else pass
         elif elem == "#":
             pass  # cannot move, ignore instruction
         else:
@@ -153,6 +159,46 @@ class State:
         if new_pos in boxes:
             return new_pos
         return None
+
+    def process_both(self, dir, new_robot_pos):
+        first_box = None
+        new_pos = self.pos + dir
+        elem = elem_at_pos(self.grid, new_pos)
+        while True:
+            if elem == EMPTY:
+                if first_box is not None:
+                    if dir.x != 0:
+                        # horizontal, easier
+                        # n_boxes = abs(new_pos.x-self.pos.x)//2
+                        # todo grid line not as str, but as list of chars, then remove and insert element!
+                        del self.grid[self.pos.y][new_pos.x]
+                        self.grid[self.pos.y].insert(new_robot_pos.x, EMPTY)
+                        # self.grid[new_pos.y] = replace_in_str_from(self.grid[new_pos.y], BOX_BOTH * n_boxes, (self.pos + dir).x)
+                        # self.grid[new_pos.y] = replace_in_str_from(self.grid[new_pos.y], BOX_BOTH * n_boxes, (self.pos + dir).x)
+                        # self.grid[new_pos.y] = replace(self.grid[new_pos.y], BOX_BOTH, new_pos.x)
+                        # self.grid[first_box.y] = replace(self.grid[first_box.y], EMPTY, first_box.x)
+                    else:
+                        # harder
+                        pass
+
+                self.pos = new_robot_pos
+                break
+            elif elem == BOX_L or elem == BOX_R:
+                if dir.x != 0:
+                    # horizontal, easier
+                    if first_box is None:
+                        first_box = new_pos
+                else:
+                    # TODO
+                    pass
+            elif elem == "#":
+                # cannot move, ignore instruction
+                break
+            else:
+                print(f"ERR: Unknown element '{elem}'")
+
+            new_pos += dir
+            elem = elem_at_pos(self.grid, new_pos)
 
     def move_boxes(self, boxes_to_move, dir):
         boxes_to_move = set(boxes_to_move)
@@ -171,6 +217,7 @@ class State:
             # assert inbounds(grid, new_pos)
 
             elem = elem_at_pos(self.grid, new_pos)
+            # print(f"{new_pos=}, {elem=}, {boxes_to_move=}")
             if elem == EMPTY:
                 box_coll_pos = new_pos if new_pos in boxes else None
                 if box_coll_pos is None:
@@ -187,14 +234,16 @@ class State:
                 print(f"ERR: Unknown element '{elem}'")
             prev_pos = new_pos
 
+# todo copy process_y and create process_both, using can_move_in_dir_function, which is the single place where checking
+#  of WALL is and using x and y-specific recursive functions for getting boxes to move
+
 def process_instructions(grid, instructions):
     start_pos = find_one_in_grid(grid, "@")
+    print(f"{start_pos=}")
     grid[start_pos.y][start_pos.x] = EMPTY
 
     s = State(grid, start_pos)
     for i in instructions:
-        # part a
-        # s.process_instruction_a(i)
         s.process_instruction(i)
     return s
 
@@ -204,6 +253,7 @@ def gps(boxes):
         num = b.x + 100 * b.y
         s += num
     return s
+
 
 fgrid = process_instructions(grid, instructions).grid
 # fill_grid(fgrid, boxes, "[")
