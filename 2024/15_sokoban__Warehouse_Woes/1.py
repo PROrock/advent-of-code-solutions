@@ -1,9 +1,10 @@
 import itertools
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
-from utils.grid_utils import print_grid, print_grid_str, Vect, elem_at_pos, find_all_in_grid, ARR_TO_VECT
+from utils.grid_utils import print_grid, print_grid_str, Vect, elem_at_pos, find_all_in_grid, ARR_TO_VECT, \
+    fill_grid_str, find_one_in_grid, fill_grid
 
 EMPTY = "."
 BOX = "O"
@@ -13,8 +14,9 @@ BOX_BOTH = "[]"
 
 
 def load_lines():
-    file = "./1.s.in"
-    # file = "./1.in"
+    # file = "./1.s.in"
+    # file = "./1.s.b.in"
+    file = "./1.in"
     # file = "./2.in"
     return Path(file).read_text().splitlines()
 
@@ -31,17 +33,38 @@ def twice_map(grid):
     new_grid = [list(itertools.chain.from_iterable(line)) for line in new_grid]
     return new_grid
 
+def snd_v(box):
+    return box + Vect(1, 0)
+
+def add_box(box):
+    boxes[box] = box
+    boxes[snd_v(box)] = box
+
+def del_box(box):
+    del boxes[box]
+    del boxes[snd_v(box)]
 
 lines = load_lines()
 empty_line_idx = lines.index("")
 grid = lines[:empty_line_idx]
 # part b
 grid = twice_map(grid)
+print_grid_str(grid)
+
+boxes_list = find_all_in_grid(grid, "[")
+grid = fill_grid(grid, boxes_list, ".")
+grid = fill_grid(grid, find_all_in_grid(grid, "]"), ".")
+print(boxes_list)
+
+boxes = {}
+for box in boxes_list:
+    add_box(box)
+print(boxes)
+# print_grid_str(grid)
 
 instructions = "".join(lines[empty_line_idx + 1:])
 height = len(grid)
 width = len(grid[0])
-
 print_grid_str(grid)
 print(instructions)
 
@@ -80,21 +103,69 @@ class State:
     #         new_pos += dir
     #         elem = elem_at_coor(self.grid, new_pos)
 
-    def can_box_move(self, box_pos, dir):
-        # todo later?
-        # TODO also fcking it and having them dynamically in a hashmap might be easeier than always redrawing the map...
-        # check new pos
-        # for both x
-        # recurse
-        # gather boxes pos for later usage?
-        pass
+    def get_boxes_to_move_y(self, box_pos, dir) -> Optional[List[Vect]]:
+        assert box_pos in boxes and snd_v(box_pos) in boxes
+
+        all_boxes_to_move = [box_pos]
+        for pos in [box_pos, snd_v(box_pos)]:
+            new_pos = pos + dir
+            if elem_at_pos(self.grid, new_pos) != EMPTY:  #wall
+                return None
+
+            box_coll_pos = self.get_box_coll_pos(new_pos)
+            if box_coll_pos is not None:
+                boxes_to_move = self.get_boxes_to_move_y(boxes[box_coll_pos], dir)
+                if boxes_to_move is None:
+                    return None
+                print(f"{pos=}, add {boxes_to_move=}")
+                all_boxes_to_move.extend(boxes_to_move)
+            # else pass
+        return all_boxes_to_move
 
     def process_instruction(self, instruction):
         dir = ARR_TO_VECT[instruction]
-        new_pos = self.pos + dir
         new_robot_pos = self.pos + dir
+        print(instruction, dir, new_robot_pos, "b:", list(boxes.keys()))
+
+        # self.process_both(dir, new_robot_pos)
+        if dir.x != 0:
+            self.process_x(dir, new_robot_pos)
+        else:
+            self.process_y(dir, new_robot_pos)
+
+    def process_y(self, dir, new_robot_pos):
+        prev_pos = self.pos
+        new_pos = prev_pos + dir
         elem = elem_at_pos(self.grid, new_pos)
+
+        if elem == EMPTY:
+            box_coll_pos = self.get_box_coll_pos(new_pos)
+            if box_coll_pos is None:
+                self.pos = new_robot_pos
+            else:
+                # if new_pos in boxes or (new_pos + Vect(-1, 0)) in boxes:
+                boxes_to_move = self.get_boxes_to_move_y(boxes[box_coll_pos], dir)
+                if boxes_to_move is not None:
+                    self.move_boxes(boxes_to_move, dir)
+                    self.pos = new_robot_pos
+            # else pass
+        elif elem == "#":
+            pass  # cannot move, ignore instruction
+        else:
+            print(f"ERR: Unknown element '{elem}'")
+
+    @staticmethod
+    def get_box_coll_pos(new_pos):
+        if new_pos in boxes:
+            return new_pos
+        # if (new_pos2 := (new_pos + Vect(-1, 0))) in boxes:
+        #     return new_pos2
+        return None
+
+    def process_both(self, dir, new_robot_pos):
         first_box = None
+        new_pos = self.pos + dir
+        elem = elem_at_pos(self.grid, new_pos)
         while True:
             if elem == EMPTY:
                 if first_box is not None:
@@ -131,23 +202,53 @@ class State:
             new_pos += dir
             elem = elem_at_pos(self.grid, new_pos)
 
+    def move_boxes(self, boxes_to_move, dir):
+        boxes_to_move = set(boxes_to_move)
+        for box in boxes_to_move:
+            del_box(box)
+        for box in boxes_to_move:
+            new_box = box + dir
+            add_box(new_box)
+
+    def process_x(self, dir, new_robot_pos):
+        prev_pos = self.pos
+        boxes_to_move = []
+
+        while True:
+            new_pos = prev_pos + dir
+            elem = elem_at_pos(self.grid, new_pos)
+            print(f"{new_pos=}, {elem=}, {boxes_to_move=}")
+            if elem == EMPTY:
+                box_coll_pos = new_pos if new_pos in boxes else None
+                if box_coll_pos is None:
+                    if len(boxes_to_move):
+                        self.move_boxes(boxes_to_move, dir)
+                    self.pos = new_robot_pos
+                    break
+                else:
+                    boxes_to_move.append(boxes[box_coll_pos])
+                    new_pos = new_pos + dir  # skip second part of the box
+            elif elem == "#":
+                pass  # cannot move, ignore instruction
+            else:
+                print(f"ERR: Unknown element '{elem}'")
+            prev_pos = new_pos
+
+# todo copy process_y and create process_both, using can_move_in_dir_function, which is the single place where checking
+#  of WALL is and using x and y-specific recursive functions for getting boxes to move
 
 def process_instructions(grid, instructions):
-    pos = find_all_in_grid(grid, "@")[0]
-    print(pos)
-    grid[pos.y][pos.x] = EMPTY
+    start_pos = find_one_in_grid(grid, "@")
+    print(f"{start_pos=}")
+    grid[start_pos.y][start_pos.x] = EMPTY
 
-    s = State(grid, pos)
+    s = State(grid, start_pos)
     for i in instructions:
         s.process_instruction(i)
     return s
 
-
-def gps(grid):
+def gps(boxes):
     s = 0
-    # todo predelat na box opening
-    boxes = find_all_in_grid(grid, BOX)
-    print(boxes)
     for b in boxes:
         num = b.x + 100 * b.y
         s += num
@@ -155,5 +256,10 @@ def gps(grid):
 
 
 fgrid = process_instructions(grid, instructions).grid
-print_grid(fgrid)
-print(gps(fgrid))
+fill_grid(fgrid, boxes, "[")
+print_grid_str(fgrid)
+# a
+# boxes = find_all_in_grid(grid, BOX)
+# print(boxes)
+
+print(gps(boxes))
