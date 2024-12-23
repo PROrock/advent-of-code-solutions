@@ -170,7 +170,7 @@ class State:
                     if dir.x != 0:
                         # horizontal, easier
                         # n_boxes = abs(new_pos.x-self.pos.x)//2
-                        # todo grid line not as str, but as list of chars, then remove and insert element!
+                        # to-do grid line not as str, but as list of chars, then remove and insert element!
                         del self.grid[self.pos.y][new_pos.x]
                         self.grid[self.pos.y].insert(new_robot_pos.x, EMPTY)
                         # self.grid[new_pos.y] = replace_in_str_from(self.grid[new_pos.y], BOX_BOTH * n_boxes, (self.pos + dir).x)
@@ -189,7 +189,7 @@ class State:
                     if first_box is None:
                         first_box = new_pos
                 else:
-                    # TODO
+                    # TO-DO
                     pass
             elif elem == "#":
                 # cannot move, ignore instruction
@@ -234,7 +234,7 @@ class State:
                 print(f"ERR: Unknown element '{elem}'")
             prev_pos = new_pos
 
-# todo copy process_y and create process_both, using can_move_in_dir_function, which is the single place where checking
+# to-do copy process_y and create process_both, using can_move_in_dir_function, which is the single place where checking
 #  of WALL is and using x and y-specific recursive functions for getting boxes to move
 
 def process_instructions(grid, instructions):
