@@ -98,6 +98,7 @@ ARR_TO_VECT = {
     "v": Vect(0, 1),
     "<": Vect(-1, 0),
 }
+VECT_TO_ARR = {v:a for a,v in ARR_TO_VECT.items()}
 
 
 # search, expand
