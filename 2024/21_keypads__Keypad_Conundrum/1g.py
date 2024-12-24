@@ -1,4 +1,5 @@
 import itertools
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, List
 from dataclasses import dataclass
@@ -9,6 +10,12 @@ KEYPAD = {c: Vect(x,y) for y, line in enumerate(["789", "456", "123", "X0A"]) fo
 # print(KEYPAD)
 DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enumerate(line)}
 # print(DIRPAD)
+
+# todo
+# N_ROBOTS = 2
+N_ROBOTS = 10
+# N_ROBOTS = 15
+# N_ROBOTS = 25
 
 def signum(x):
     if x > 0:
@@ -44,8 +51,10 @@ def to_arr(diff, pos, keypad):
         arrs = arrs[::-1] # x first
     return list(itertools.chain.from_iterable(arrs))
 
-
-def spath(code, keypad):
+@lru_cache(maxsize=None)
+def spath(code, is_dirpad):
+    print("cache miss", code)
+    keypad = DIRPAD if is_dirpad else KEYPAD
     pos = keypad["A"]
     arrs = []
     for c in code:
@@ -53,17 +62,40 @@ def spath(code, keypad):
         arrs.extend(arr)
         arrs.append("A")  # press the button labeled c
         # print(arrs)
-    return arrs
+    return "".join(arrs)
+
+def spath_dirA(code):
+    arrs = []
+    segments = code.split("A")[:-1]
+    # print(segments)
+    segments = [s+"A" for s in segments]
+    # print("code", code)
+    # print(segments)
+
+    for s in segments:
+        arrs.extend(spath(s, is_dirpad=True))
+    return "".join(arrs)
+def spath_dir(code):
+    arrs = []
+    segments = code.split("AA")
+    print("code", code)
+    print(segments)
+    segments = [s+"AA" for s in segments]
+    print(segments)
+
+    for s in segments:
+        arrs.extend(spath(s, is_dirpad=True))
+    return "".join(arrs)
 
 def arrs_from_pos_to_c(pos, c, keypad):
     diff = (keypad[c] - pos)
     arr = to_arr(diff, pos, keypad)
     return arr, keypad[c]
 
-def process_line(line):
-    arrs = spath(line, KEYPAD)
-    arrs2 = spath(arrs, DIRPAD)
-    arrs3 = spath(arrs2, DIRPAD)
+def process_line_a(line):
+    arrs = spath(line, is_dirpad=False)
+    arrs2 = spath(arrs, is_dirpad=True)
+    arrs3 = spath(arrs2, is_dirpad=True)
     # print(line)
     # print("".join(arrs))
     # print("".join(arrs2))
@@ -72,7 +104,7 @@ def process_line(line):
     # exp = "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"  # 5 379A
     # # # print(exp)
     # # # print(line, len(arrs3), int(line[:-1]), "".join(arrs3))
-    # pprint(sim_whole("".join(arrs3)))
+    pprint(sim_whole("".join(arrs3)))
     # print("--")
     # pprint(sim_whole(exp))
     # pprint3(sim_whole("".join(arrs3)))
@@ -84,6 +116,27 @@ def process_line(line):
     #
     print(line, len(arrs3), int(line[:-1]), "".join(arrs3))
     return len(arrs3)*int(line[:-1])
+
+def process_line_b(line):
+    arrs = spath(line, is_dirpad=False)
+    levels=[arrs]
+    for i in range(N_ROBOTS):
+        # arrs1 = spath(arrs, is_dirpad=True)
+        arrs2 = spath_dir(arrs)
+
+        # print(arrs1)
+        # print(arrs2)
+        # assert arrs1==arrs2
+        # arrs=arrs1  #226406498
+        arrs=arrs2   #226406498
+        levels.append(arrs)
+        print(i+1, len(arrs))
+
+
+    pprint3(levels[::-1])
+    pprint(levels[::-1])
+    # print(line, len(arrs), int(line[:-1]), arrs)
+    return len(arrs)*int(line[:-1])
 
 
 def sim_whole(arrs3):
@@ -105,18 +158,16 @@ def sim(arrs, pos, keypad):
             pos += ARR_TO_VECT[a]
     return "".join(output)
 def pprint(fas):
-    for i, line in enumerate(fas):
-        if i == 0:
-            print(line)
-            prev_line = line
-            continue
-        # prev_line=fas[i-1]
+    prev_line = fas[0]
+    for i, line in enumerate(fas[1:]):
         output = []
-        line_idx = 0
+        c_in_line_idx = 0
+
         for c in prev_line:
             if c =="A":
-                output.append(line[line_idx])
-                line_idx += 1
+                # print(c, c_in_line_idx, line, prev_line)
+                output.append(line[c_in_line_idx])
+                c_in_line_idx += 1
             else:
                 output.append(" ")
         prev_line = "".join(output)
@@ -126,21 +177,19 @@ def pprint3(fas):
         print(line)
 
 
-# process_line("085A")
-# process_line("379A")
+# process_line_a("085A")
+# process_line_a("379A")
 # 1/0
 
 lines = load_lines()
 s = 0
 for line in lines:
-    number = process_line(line)
+    # number = process_line_a(line)
+    number = process_line_b(line)
+    1/0
     s += number
 
 print(s)
-# 182844
-# 188752 too high
-# 192644 is higher, if we go y first, so maybe the order rly matter!
-
 
 # v<A<AA>>^AvAA<^A>Av<<A>>^AAAvA^Av<A<A>>^AvA<^A>Av<A>^Av<<A>>^AAvA<^A>A
 #   v <<A>>^A<AAA>Av<A>^AvA<AA>^A
