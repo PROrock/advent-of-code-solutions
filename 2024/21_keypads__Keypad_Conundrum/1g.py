@@ -36,9 +36,9 @@ KEYPAD = {c: Vect(x,y) for y, line in enumerate(["789", "456", "123", "X0A"]) fo
 DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enumerate(line)}
 
 # ideas:
-# line by line again?
+# line by line again? probably not - rly slow
 # somehow compute directly?
-# somehow skip more lines in 1 go?
+# somehow skip more lines in 1 go? 5? dict for that?
 # somehow dynamic programming?
 
 
@@ -128,15 +128,15 @@ def spath(code, is_dirpad):
 
 def spath_dir(code):
     arrs = []
-    segments = code.split("A")[:-1]
-    # print(segments)
-    segments = [s+"A" for s in segments]
+    # segments = code.split("A")[:-1]
+    # segments = [s+"A" for s in segments]
+    segments = arr_split(code, "A")
     # print("code", code)
     # print(segments)
 
     for s in segments:
         arrs.extend(spath(s, is_dirpad=True))
-    return "".join(arrs)
+    return tuple(arrs)
 def spath_dirAA_WIP(code):
     arrs = []
     segments = code.split("AA")
@@ -222,18 +222,18 @@ def process_line_a(line):
 
 def process_line_b_by_lines(line):
     arrs = spath(line, is_dirpad=False)
-    levels=[arrs]
+    # levels=[arrs]
     for i in range(N_ROBOTS):
         # arrs1 = spath(arrs, is_dirpad=True)
         arrs2 = spath_dir(arrs)
         arrs=arrs2
-        levels.append(arrs)
+        # levels.append(arrs)
         # print(i+1, len(arrs), "prev", len(levels[i]), "ratio", len(arrs)/len(levels[i]))  # ratio is around 2.5
 
     # pprint3(levels[::-1])
     # print("-")
     # pprint(levels[::-1])
-    print(line, len(arrs), int(line[:-1]), arrs)
+    # print(line, len(arrs), int(line[:-1]), arrs)
     return len(arrs)*int(line[:-1])
 
 def process_line_b_rec(line):
