@@ -1,6 +1,7 @@
 import itertools
 from functools import lru_cache
 from pathlib import Path
+from time import perf_counter
 from typing import NamedTuple
 
 # from utils.grid_utils import Vect, ARR_TO_VECT
@@ -34,17 +35,31 @@ ARR_TO_VECT = {
 KEYPAD = {c: Vect(x,y) for y, line in enumerate(["789", "456", "123", "X0A"]) for x, c in enumerate(line)}
 DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enumerate(line)}
 
+# ideas:
+# line by line again?
+# somehow compute directly?
+# somehow skip more lines in 1 go?
+# somehow dynamic programming?
+
+
 # todo
 # N_ROBOTS = 2
 # N_ROBOTS = 5
 # N_ROBOTS = 10
-N_ROBOTS = 15
+# N_ROBOTS = 15
+# N_ROBOTS = 17
+N_ROBOTS = 18  # 15-19,5s w/o cleanup, (15s w/o, 1m19s w/)
+# N_ROBOTS = 20
 # N_ROBOTS = 25
 
 # 5: 2747526
 #10: 261627290
 #15: 24923343972
-#
+#17: 154231715988
+#18: 383670273596
+#20: 2374260460314  # took many mins (18,5 mins w. cleanup) and 60GBs of memory
+#day 11: 75 blinks:
+#D11:237994815702032
 
 def signum(x):
     if x > 0:
@@ -107,7 +122,9 @@ def spath(code, is_dirpad):
         arrs.extend(arr)
         arrs.append("A")  # press the button labeled c
         # print(arrs)
-    return "".join(arrs)
+    # return "".join(arrs)
+    # return arrs
+    return tuple(arrs)
 
 def spath_dir(code):
     arrs = []
@@ -132,21 +149,46 @@ def spath_dirAA_WIP(code):
         arrs.extend(spath(s, is_dirpad=True))
     return "".join(arrs)
 
+# slightly faster (but maybe because of cleanup?)
+def arr_split(arr, sep):
+    prev_i = 0
+    for i,c in enumerate(arr):
+        if c==sep:
+            yield arr[prev_i:i+1]
+            prev_i = i+1
+
+    # yield arr[prev_i:i+1]  # commented, so I don't have to forget last yield (because A is always the last letter)
+
+def arr_split2(arr, sep):
+    prev_i = 0
+    aas = False
+    for i,c in enumerate(arr):
+        if c!=sep and aas:
+            yield arr[prev_i:i]
+            prev_i = i
+            aas = False
+        if c==sep:
+            aas = True
+    yield arr[prev_i:i+1]
+
 @lru_cache(maxsize=None)
 def spath_dir_rec(code, n):
     if n == 0:
         # print(n, code)
         return code
     # if n>=20:
+    # if n>=N_ROBOTS-2:
+    # if n>=15:
     #     print(n, code)
 
-    segments = code.split("A")[:-1]
-    segments = [s+"A" for s in segments]
+    segments = arr_split(code, "A")
+    # segments = code.split("A")[:-1]
+    # segments = [s+"A" for s in segments]
     # print("code", code)
     # print(segments)
     # print(n, N_ROBOTS-n, "code", code, segments)
 
-    # if n>=20:
+    # if n>=N_ROBOTS-1:
     #     print(n, code, segments)
 
     # 3s user 3,3 total
@@ -161,7 +203,8 @@ def spath_dir_rec(code, n):
     #     next_level_code = spath(s, is_dirpad=True)  # spath_dir(s) doesnt make sense, already split into segments!
     #     whole_next_code.append(next_level_code)
     # arrs = spath_dir_rec("".join(whole_next_code), n-1)
-    return "".join(arrs)
+    # return "".join(arrs)
+    return arrs
 
 
 def arrs_from_pos_to_c(pos, c, keypad):
@@ -197,16 +240,16 @@ def process_line_b_rec(line):
     arrs = spath(line, is_dirpad=False)
     # levels=[arrs]
 
-    segments = arrs.split("A")[:-1]
-    # print(segments)
-    segments = [s+"A" for s in segments]
+    segments = arr_split(arrs, "A")
+    # segments = arrs.split("A")[:-1]
+    # # print(segments)
+    # segments = [s+"A" for s in segments]
     arrs = []
     for s in segments:
         arrs.extend(spath_dir_rec(s, N_ROBOTS))
 
     # pprint(levels[::-1])
-    arrs = "".join(arrs)
-
+    # arrs = "".join(arrs)
     # pprint(sim_whole(arrs))
     # print(line, len(arrs), int(line[:-1]), arrs)
     return len(arrs)*int(line[:-1])
@@ -255,12 +298,17 @@ def pprint3(fas):
 #     process_line_b(d)
 # 1/0
 
+start = perf_counter()
 lines = load_lines()
 s = 0
 for line in lines:
+    print(line)
     # number = process_line_a(line)
     number = process_line_b(line)
     # 1/0
     s += number
 
 print(s)
+end = perf_counter()
+print(end-start, "s")
+print((end-start)/60, "mins")
