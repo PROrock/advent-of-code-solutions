@@ -1,10 +1,9 @@
 import re
-from collections import deque, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from pprint import pprint
 
-from utils.utils import ints, split_lines_on_empty_line
+from utils.utils import split_lines_on_empty_line
 
 
 def load_lines():
@@ -26,12 +25,9 @@ class Gate:
         if self.op == "XOR": return a ^ b
         assert "WTF" == ""
 
-
 def parse(line):
-    # a,op,b,out = re.fullmatch(r"(\w{3}) (AND|OR|XOR) (\w{3}) -> (\w{3})")
     groups = re.fullmatch(r"(\w{3}) (AND|OR|XOR) (\w{3}) -> (\w{3})", line).groups()
     return Gate(*groups)
-
 
 def get_o(n):
     if n in vals:
@@ -57,10 +53,6 @@ for line in gates_lines:
 
 zs = [g for g in gates if g.startswith("z")]
 # # part a
-# # pprint(vals)
-# # pprint(gates)
-# # print(zs)
-#
 # bits=[]
 # for z in sorted(zs, reverse=True):
 #     bits.append(get_o(z))
@@ -76,10 +68,7 @@ def gen_dot(gates):
 def edge_dot(g, a):
     return f"{a} -> {g.out} [label={g.op}]"
 
-# gen_dot(gates)
-
 max_z = max(int(z[1:]) for z in zs)
-# print(max_z)
 
 def add_node(out, a, op, b):
     correct[out] = Gate(a, op, b, out)
@@ -104,9 +93,6 @@ c44 = correct[n("c", max_z-1)]
 add_node(n("z", max_z), c44.a, c44.op, c44.b)
 del correct[n("c", max_z-1)]
 
-# pprint(correct)
-# gen_dot(correct)
-
 assert len(correct) == len(gates)
 
 def g_by_in(gates):
@@ -116,70 +102,15 @@ def g_by_in(gates):
         in2gates[g.b].append(g)
     return in2gates
 
-
 in2gates = g_by_in(gates)
 in2corrects = g_by_in(correct)
 
 # matching!
-w2g = {}
-# for i in range(max_z):
-#     for l in "xyz":
-#         w2g[n(l, i)] = n(l, i)
-# pprint(w2g)
-
-# # z45 = l44+m44
-# q = deque([n("z", max_z)])
-# while len(q):
-#     v = q.popleft()
-#     cg = correct[v]
-#     wg = gates[v]
-#     # print(cg)
-#     # print(wg)
-#     assert wg.op == cg.op
-#     # todo symmetry! also start from x and y probably!
-#     w2g[wg.a]=cg.a
-#     w2g[wg.b]=cg.b
-#
-#     q.extend([wg.a,wg.b])
-#     # todo
-#     break
-
-xys=list()
-for i in range(max_z):
-    for l in "xy":
-        xys.append(n(l, i))
-
 def find_by_op(gs, op, assert_size=None):
     filtered = [g for g in gs if g.op == op]
     if assert_size is not None:
         assert len(filtered)==assert_size
     return filtered[0]
-
-xys_set = set(xys)
-x_to_check = [n("x", i) for i in range(0, max_z)]
-
-swapped = []
-def check_l(v: str, i, x):
-    # print(f"checking {v}")
-    if v.startswith("z"):
-        print(f"candidate for swap! {v} is swapped with an 'l' node!")
-        return
-
-    wgs = in2gates[v]
-    corr_v = n("l", i)
-    cgs = in2corrects[corr_v]
-    if len(wgs) != len(cgs):
-        # gate = gates[v]
-        # swapped_with = "k" if gate.op=="XOR" else "c"
-        # print(f"candidate for swap! {v} should have {len(cgs)}, but has {len(wgs)} out arrows. Candidate for k or c node. By gate and op {gate} it is '{swapped_with}'. {wgs}")
-        print(f"candidate for swap! {v} should have {len(cgs)}, but has {len(wgs)} out arrows. Candidate for k or c node. Wrong in2gates: {wgs}")
-        return
-    # assert len(wgs) == len(cgs)
-    # assert 1 <= len(wgs) <= 2
-    # assert 1 <= len(cgs) <= 2
-    # assert len(wgs) == 1
-    # assert len(cgs) == 1
-    w2g[lv]= corr_v
 
 def check_general(v: str, corr_v, exp_insize):
     if corr_v == n("c", max_z-1):
@@ -188,40 +119,22 @@ def check_general(v: str, corr_v, exp_insize):
 
     wgs = in2gates[v]
     cgs = in2corrects[corr_v]
-    # print(v, corr_v, wgs, cgs)
     assert exp_insize == len(cgs)
 
     if len(wgs) != len(cgs):
         swapped.append(v)
-        print(f"candidate for swap! {v} should have {len(cgs)} like {corr_v}, but has {len(wgs)} out arrows. Candidates {get_candidates(wgs)}. Wrong in2gates: {wgs}")
         return None
-    w2g[lv]= corr_v
     return corr_v
 
-def get_candidates(wgs):
-    if len(wgs) == 2:
-        return ["k", "c"]
-    if len(wgs) == 1:
-        # g=wgs[0]
-        # if
-        return ["l", "m"]
-    if len(wgs) == 0:
-        return ["z"]
-    print("WEIRD CANDICATES!!! ", wgs)
-    return ["WEIRD CANDICATES!"]
-#
+swapped = []
+x_to_check = [n("x", i) for i in range(0, max_z)]
 for i, x in enumerate(x_to_check):
     if i == 0:
-        # todo
-        # todo 0 as exception! doesnt have k and l but z and c!
+        # to-do 0 as exception! doesn't have k and l but z and c!
+        # could be programmed, if needed, probably via some 1-2 "if" statements as z45
         continue
-    # if i == 1:
-    #     # todo
-    #     # todo 0 as exception! doesnt have k and l but z and c!
-    #     continue
-    v = x
-    wgs = in2gates[v]
-    cgs = in2corrects[v]
+    wgs = in2gates[x]
+    cgs = in2corrects[x]
 
     lv = find_by_op(wgs, "AND", 1).out
     kv = find_by_op(wgs, "XOR", 1).out
@@ -239,27 +152,5 @@ for i, x in enumerate(x_to_check):
         zv = find_by_op(m_and_z, "XOR", 1).out
         corr_m = check_general(mv, n("m", i), 1)
         corr_z = check_general(zv, n("z", i), 0)
-# todo why 9?
 
-
-
-# inputs a,b are always right!
-# outputs can be wrong
-# network can be wrong but inputs are calling right inputs
-
-# for z in zs:
-#     wgs = in2gates[z]
-#     if len(wgs) != 0:
-#         print(f"{z} has {len(wgs)}, {wgs=}")
-# for z in zs:
-#     wgs = gates.get(z)
-#     if wgs is not None:
-#         print(f"{z} has {wgs=}")
-# # always
-
-missing = set(gates)-set(w2g)
-print(missing)
-
-
-pprint(w2g)
 print(",".join(sorted(swapped)))
