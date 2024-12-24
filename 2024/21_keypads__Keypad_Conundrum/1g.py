@@ -12,8 +12,10 @@ DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enum
 # print(DIRPAD)
 
 # todo
+# N_ROBOTS = 0
 # N_ROBOTS = 2
-N_ROBOTS = 10
+N_ROBOTS = 5
+# N_ROBOTS = 10
 # N_ROBOTS = 15
 # N_ROBOTS = 25
 
@@ -30,7 +32,7 @@ def load_lines():
     return Path(file).read_text().splitlines()
 
 
-def to_arrx(diff, pos, keypad):
+def to_arrx(diff, pos, keypad, c):
     arrs=[]
     for dim, d_arrs in zip(diff, ["<>", "^v"]):
         s = signum(dim)
@@ -40,16 +42,33 @@ def to_arrx(diff, pos, keypad):
         arrs = arrs[::-1]
     return list(itertools.chain.from_iterable(arrs))
 
-def to_arr(diff, pos, keypad):
+def to_arr_y(diff, pos, keypad, c):
     arrs=[]
     for dim, d_arrs in zip(diff, ["<>", "^v"]):
         s = signum(dim)
         sym = "" if s == 0 else d_arrs[(s+1)//2]
         arrs.append(sym*abs(dim))
     arrs = arrs[::-1] # y first
-    if pos.x == keypad["X"].x or "<" in arrs[1]:
+    if pos.x == keypad["X"].x or "<" in arrs[1]:                             # works on big (n==2)
+    # if pos.x == keypad["X"].x or ("<" in arrs[1] and pos.y != keypad["X"].y):  # works on small
+    # if pos.x == keypad["X"].x or ("<" in arrs[1] and keypad[c].x!=keypad["X"].x):
         arrs = arrs[::-1] # x first
     return list(itertools.chain.from_iterable(arrs))
+
+def to_arr(diff, pos, keypad, c):
+    arrs=[]
+    for dim, d_arrs in zip(diff, ["<>", "^v"]):
+        s = signum(dim)
+        sym = "" if s == 0 else d_arrs[(s+1)//2]
+        arrs.append(sym*abs(dim))
+    # prefer x first
+    # if ">" in arrs[0] and
+    # target_pos = keypad[c]
+    if (pos.y == keypad["X"].y and keypad[c].x == keypad["X"].x) or (
+            ">" in arrs[0] and pos.x != keypad["X"].x):
+        arrs = arrs[::-1]  # y first
+    return list(itertools.chain.from_iterable(arrs))
+
 
 @lru_cache(maxsize=None)
 def spath(code, is_dirpad):
@@ -64,7 +83,7 @@ def spath(code, is_dirpad):
         # print(arrs)
     return "".join(arrs)
 
-def spath_dirA(code):
+def spath_dir(code):
     arrs = []
     segments = code.split("A")[:-1]
     # print(segments)
@@ -75,7 +94,7 @@ def spath_dirA(code):
     for s in segments:
         arrs.extend(spath(s, is_dirpad=True))
     return "".join(arrs)
-def spath_dir(code):
+def spath_dirAA_WIP(code):
     arrs = []
     segments = code.split("AA")
     print("code", code)
@@ -87,9 +106,62 @@ def spath_dir(code):
         arrs.extend(spath(s, is_dirpad=True))
     return "".join(arrs)
 
+@lru_cache(maxsize=None)
+def spath_dir_rec_bad(code, n):
+    if n == 0:
+        print(n, code)
+        return code
+    # if n>=20:
+    #     print(n, code)
+
+    arrs = []
+    segments = code.split("A")[:-1]
+    # print(segments)
+    segments = [s+"A" for s in segments]
+    # print("code", code)
+    # print(segments)
+    # print(n, N_ROBOTS-n, "code", code, segments)
+
+    if n>=20:
+        print(n, code, segments)
+
+    for s in segments:
+        # arrs.extend(spath(s, is_dirpad=True))
+        next_level_code = spath(s, is_dirpad=True)
+        # next_level_code = spath_dir(s)  # doesnt make sense, already splitted into segments!
+        arrs.extend(spath_dir_rec_bad(next_level_code, n-1))
+    return "".join(arrs)
+
+@lru_cache(maxsize=None)
+def spath_dir_rec(code, n):
+    if n == 0:
+        print(n, code)
+        return code
+    # if n>=20:
+    #     print(n, code)
+
+    arrs = []
+    segments = code.split("A")[:-1]
+    # print(segments)
+    segments = [s+"A" for s in segments]
+    # print("code", code)
+    # print(segments)
+    # print(n, N_ROBOTS-n, "code", code, segments)
+
+    if n>=20:
+        print(n, code, segments)
+
+    for s in segments:
+        # arrs.extend(spath(s, is_dirpad=True))
+        next_level_code = spath(s, is_dirpad=True)
+        # next_level_code = spath_dir(s)  # doesnt make sense, already split into segments!
+        arrs.extend(spath_dir_rec(next_level_code, n-1))
+    return "".join(arrs)
+
+
 def arrs_from_pos_to_c(pos, c, keypad):
     diff = (keypad[c] - pos)
-    arr = to_arr(diff, pos, keypad)
+    arr = to_arr(diff, pos, keypad, c)
     return arr, keypad[c]
 
 def process_line_a(line):
@@ -132,10 +204,53 @@ def process_line_b(line):
         levels.append(arrs)
         print(i+1, len(arrs))
 
+    # for i in range(N_ROBOTS):
+    #     # arrs1 = spath(arrs, is_dirpad=True)
+    #     arrs2 = spath_dir(arrs)
+    #
+    #     # print(arrs1)
+    #     # print(arrs2)
+    #     # assert arrs1==arrs2
+    #     # arrs=arrs1  #226406498
+    #     arrs=arrs2   #226406498
+    #     levels.append(arrs)
+    #     print(i+1, len(arrs))
 
     pprint3(levels[::-1])
     pprint(levels[::-1])
-    # print(line, len(arrs), int(line[:-1]), arrs)
+    print(line, len(arrs), int(line[:-1]), arrs)
+    return len(arrs)*int(line[:-1])
+
+def process_line_b_new(line):
+    arrs = spath(line, is_dirpad=False)
+    # levels=[arrs]
+
+    segments = arrs.split("A")[:-1]
+    # print(segments)
+    segments = [s+"A" for s in segments]
+    arrs = []
+    for s in segments:
+        arrs.extend(spath_dir_rec(s, N_ROBOTS))
+
+    # for i in range(N_ROBOTS):
+    #     # arrs1 = spath(arrs, is_dirpad=True)
+    #     arrs2 = spath_dir(arrs)
+    #
+    #     # print(arrs1)
+    #     # print(arrs2)
+    #     # assert arrs1==arrs2
+    #     # arrs=arrs1  #226406498
+    #     arrs=arrs2   #226406498
+    #     levels.append(arrs)
+    #     print(i+1, len(arrs))
+
+    # pprint3(levels[::-1])
+    # pprint(levels[::-1])
+    arrs = "".join(arrs)
+
+    pprint(sim_whole(arrs))
+    # pprint(sim_whole("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
+    print(line, len(arrs), int(line[:-1]), arrs)
     return len(arrs)*int(line[:-1])
 
 
@@ -159,6 +274,7 @@ def sim(arrs, pos, keypad):
     return "".join(output)
 def pprint(fas):
     prev_line = fas[0]
+    print(prev_line)
     for i, line in enumerate(fas[1:]):
         output = []
         c_in_line_idx = 0
@@ -179,6 +295,10 @@ def pprint3(fas):
 
 # process_line_a("085A")
 # process_line_a("379A")
+# process_line_b("179A")
+# for d in ["283A"]:
+#     process_line_a(d)
+#     process_line_b(d)
 # 1/0
 
 lines = load_lines()
@@ -186,7 +306,7 @@ s = 0
 for line in lines:
     # number = process_line_a(line)
     number = process_line_b(line)
-    1/0
+    # 1/0
     s += number
 
 print(s)
