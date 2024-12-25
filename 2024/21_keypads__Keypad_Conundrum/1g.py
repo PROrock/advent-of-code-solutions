@@ -1,8 +1,12 @@
 import itertools
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 from time import perf_counter
 from typing import NamedTuple
+
+FOUR = 4
+
 
 # from utils.grid_utils import Vect, ARR_TO_VECT
 
@@ -239,6 +243,26 @@ def spath_dir_5(code):
     d5[code] = sp
     return sp
 
+def spath_dir_5_n_as(arrs, n_as):
+    if arrs in d5[n_as]:
+        return d5[n_as][arrs]
+    # print("mapping miss", "".join(arrs))
+    if n_as <= FOUR:
+        # print("mapping miss", "".join(arrs))
+        sp = spath_dir_rec(arrs, DENUM)
+        # print("mapping miss END")  # it's not the DENUM levels of spath, it's the overhead, the merging and splitting!
+        d5[n_as][arrs] = sp
+        return sp
+
+    new_n = n_as // FOUR
+    segments = arr_split_mult_sep(arrs, "A", new_n)
+    new_arrs = []
+    for s in segments:
+        new_arrs.append(spath_dir_5_n_as(s, new_n))
+    sp = tuple(itertools.chain.from_iterable(new_arrs))
+    d5[n_as][arrs] = sp
+    return sp
+
 def spath_dir_mapping(code, n):
     if code in mapping:
         return mapping[code]
@@ -300,7 +324,9 @@ def process_line_b_rec_5(line):
     for epoch in range(N_ROBOTS//DENUM):
         print(epoch, len(arrs))
 
-        segments = arr_split(arrs, "A")
+        # segments = arr_split(arrs, "A")
+        n_as = (epoch + 1) * 4
+        segments = arr_split_mult_sep(arrs, "A", n_as)
 # todo back
 #         segments = list(arr_split(arrs, "A"))
 #         print(segments)
@@ -311,7 +337,7 @@ def process_line_b_rec_5(line):
         # arrs = tuple(arrs)
         arrs = []
         for s in segments:
-            arrs.append(spath_dir_5(s))
+            arrs.append(spath_dir_5_n_as(s, n_as))
         arrs = tuple(itertools.chain.from_iterable(arrs))
 
     return len(arrs)*int(line[:-1])
@@ -387,7 +413,8 @@ def pprint3(fas):
 # 1/0
 
 start = perf_counter()
-d5 = {}
+# d5 = {}
+d5 = defaultdict(dict)
 mapping = {}
 lines = load_lines()
 s = 0
