@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from utils.utils import split_lines_on_empty_line
+from utils.utils import split_lines_on_empty_line_in_2
 
 
 def load_lines():
@@ -40,7 +40,7 @@ def get_o(n):
 
 
 lines = load_lines()
-vals_lines, gates_lines = split_lines_on_empty_line(lines)
+vals_lines, gates_lines = split_lines_on_empty_line_in_2(lines)
 vals = {}
 for line in vals_lines:
     a,b = line.split(": ")

@@ -9,13 +9,13 @@ INT_PAT = re.compile(INT_STR)
 def replace_in_str_from(s, idx, replacement):
     return f"{s[:idx]}{replacement}{s[idx + len(replacement):]}"
 
-def split_lines_on_empty_line(lines):
+def split_lines_on_empty_line_in_2(lines):
     empty_line_idx = lines.index("")
     a = lines[:empty_line_idx]
     b = lines[empty_line_idx+1:]
     return a,b
 
-def split_lines_by_empty_lines_general(lines):
+def gen_split_lines_by_empty_lines(lines):
     start_idx = 0
     for i, line in enumerate(lines):
         if line == "":

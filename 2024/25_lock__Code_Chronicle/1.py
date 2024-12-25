@@ -2,7 +2,7 @@ from itertools import product
 from pathlib import Path
 
 from utils.grid_utils import transpose
-from utils.utils import split_lines_by_empty_lines_general
+from utils.utils import gen_split_lines_by_empty_lines
 
 
 def load_lines():
@@ -13,7 +13,7 @@ def load_lines():
 def load(lines):
     locks = []
     keys = []
-    for object in split_lines_by_empty_lines_general(lines):
+    for object in gen_split_lines_by_empty_lines(lines):
         l = locks if object[0][0] == "#" else keys
         transposed = transpose(object[1:-1])
         height = len(transposed[0])
