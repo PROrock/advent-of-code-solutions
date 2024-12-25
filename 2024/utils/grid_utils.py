@@ -83,6 +83,8 @@ def find_all_in_grid_re(grid, char_):
             r.append(Vect(m.start(), y))
     return r
 
+def transpose(grid):
+    return list(zip(*grid))
 
 DIR_TO_VECT = {
     "N": Vect(0, -1),
