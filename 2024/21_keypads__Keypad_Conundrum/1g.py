@@ -41,6 +41,7 @@ DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enum
 # somehow skip more lines in 1 go? 5? dict for that?
 # somehow dynamic programming?
 
+DENUM = 5
 
 # todo
 # N_ROBOTS = 2
@@ -48,8 +49,8 @@ DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enum
 # N_ROBOTS = 10
 # N_ROBOTS = 15
 # N_ROBOTS = 17
-N_ROBOTS = 18  # 15-19,5s w/o cleanup, (15s w/o, 1m19s w/)
-# N_ROBOTS = 20
+# N_ROBOTS = 18  # 15-19,5s w/o cleanup, (15s w/o, 1m19s w/)
+N_ROBOTS = 20  # 5x5, 73s with 4As (and rly no extend), 75s with rly no extend, 90s with no extend , 245s with extend!
 # N_ROBOTS = 25
 
 # 5: 2747526
@@ -150,7 +151,7 @@ def spath_dirAA_WIP(code):
     return "".join(arrs)
 
 # slightly faster (but maybe because of cleanup?)
-def arr_split(arr, sep):
+def arr_split_orig(arr, sep):
     prev_i = 0
     for i,c in enumerate(arr):
         if c==sep:
@@ -171,6 +172,26 @@ def arr_split2(arr, sep):
             aas = True
     yield arr[prev_i:i+1]
 
+def arr_split_mult_sep(arr, sep, n_times):
+    prev_i = 0
+    t = 0
+    for i,c in enumerate(arr):
+        if c==sep:
+            if t == n_times-1:
+                yield arr[prev_i:i+1]
+                prev_i = i+1
+                t=0
+            else:
+                t+=1
+    if len(arr[prev_i:i+1])>0:
+        yield arr[prev_i:i+1]
+def arr_split(arr, sep):
+    # return arr_split_orig(arr, sep)
+    # return arr_split2(arr, sep)
+    return arr_split_mult_sep(arr, sep, 4)
+
+
+# todo revert?
 @lru_cache(maxsize=None)
 def spath_dir_rec(code, n):
     if n == 0:
@@ -195,7 +216,9 @@ def spath_dir_rec(code, n):
     arrs = []
     for s in segments:
         next_level_code = spath(s, is_dirpad=True)  # spath_dir(s) doesnt make sense, already split into segments!
-        arrs.extend(spath_dir_rec(next_level_code, n-1))
+        # arrs.extend(spath_dir_rec(next_level_code, n-1))
+        arrs.append(spath_dir_rec(next_level_code, n-1))
+    arrs = list(itertools.chain.from_iterable(arrs))
 
     # 13s user 14,3 total
     # whole_next_code = []
@@ -206,6 +229,23 @@ def spath_dir_rec(code, n):
     # return "".join(arrs)
     return arrs
 
+def spath_dir_5(code):
+    if code in d5:
+        return d5[code]
+
+    # print("mapping miss", "".join(code))
+    sp = spath_dir_rec(code, DENUM)
+    # print("mapping miss END")  # it's not the DENUM levels of spath, it's the overhead, the merging and splitting!
+    d5[code] = sp
+    return sp
+
+def spath_dir_mapping(code, n):
+    if code in mapping:
+        return mapping[code]
+
+    sp = spath_dir_rec(code, n)
+    mapping[code] = sp
+    return sp
 
 def arrs_from_pos_to_c(pos, c, keypad):
     diff = (keypad[c] - pos)
@@ -253,9 +293,56 @@ def process_line_b_rec(line):
     # pprint(sim_whole(arrs))
     # print(line, len(arrs), int(line[:-1]), arrs)
     return len(arrs)*int(line[:-1])
+
+def process_line_b_rec_5(line):
+    arrs = spath(line, is_dirpad=False)
+
+    for epoch in range(N_ROBOTS//DENUM):
+        print(epoch, len(arrs))
+
+        segments = arr_split(arrs, "A")
+# todo back
+#         segments = list(arr_split(arrs, "A"))
+#         print(segments)
+
+        # arrs = []
+        # for s in segments:
+        #     arrs.extend(spath_dir_5(s))
+        # arrs = tuple(arrs)
+        arrs = []
+        for s in segments:
+            arrs.append(spath_dir_5(s))
+        arrs = tuple(itertools.chain.from_iterable(arrs))
+
+    return len(arrs)*int(line[:-1])
+
+def process_line_b_rec_mapping(line):
+    arrs = spath(line, is_dirpad=False)
+
+    segments = arr_split(arrs, "A")
+    arrs = []
+    for s in segments:
+        arrs.extend(spath_dir(s))
+    arrs = tuple(arrs)
+
+    denum = 8
+    for epoch in range(N_ROBOTS//denum):
+        print(epoch, len(arrs))
+
+        segments = arr_split(arrs, "A")
+        arrs = []
+        for s in segments:
+            # arrs.extend(spath_dir_mapping(s, denum))
+            arrs.append(spath_dir_mapping(s, denum))
+        arrs = tuple(itertools.chain.from_iterable(arrs))
+        # arrs = tuple(arrs)
+
+    return len(arrs)*int(line[:-1])
 def process_line_b(line):
     # return process_line_b_by_lines(line)
-    return process_line_b_rec(line)
+    # return process_line_b_rec(line)
+    return process_line_b_rec_5(line)
+    # return process_line_b_rec_mapping(line)
 
 def sim_whole(arrs3):
     a2 = sim(arrs3, DIRPAD["A"], DIRPAD)
@@ -292,6 +379,7 @@ def pprint3(fas):
         print(line)
 
 
+# process_line_a("179A")
 # process_line_b("179A")
 # for d in ["283A"]:
 #     process_line_a(d)
@@ -299,6 +387,8 @@ def pprint3(fas):
 # 1/0
 
 start = perf_counter()
+d5 = {}
+mapping = {}
 lines = load_lines()
 s = 0
 for line in lines:
