@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import Any, List
-from dataclasses import dataclass
+from typing import Any, List, NamedTuple
+from dataclasses import dataclass, field
+import itertools as it
 from utils.grid_utils import DIRS_CLOCKWISE, DIR_TO_VECT, elem_at_pos, find_one_in_grid, inbounds, PrioritizedItem, \
     Vect, load_grid_str
 
