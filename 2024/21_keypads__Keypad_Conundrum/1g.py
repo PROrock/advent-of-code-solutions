@@ -44,18 +44,19 @@ DIRPAD = {c: Vect(x,y) for y, line in enumerate(["X^A", "<v>"]) for x, c in enum
 # somehow compute directly?
 # somehow skip more lines in 1 go? 5? dict for that?
 # somehow dynamic programming?
+# analysis - longest common substrings between levels (and for various length, to see, how much overlap there is)
+# recursively and return only final length?!
 
 DENUM = 5
 
-# todo
 # N_ROBOTS = 2
 # N_ROBOTS = 5
 # N_ROBOTS = 10
 # N_ROBOTS = 15
 # N_ROBOTS = 17
 # N_ROBOTS = 18  # 15-19,5s w/o cleanup, (15s w/o, 1m19s w/)
-N_ROBOTS = 20  # 5x5, 73s with 4As (and rly no extend), 75s with rly no extend, 90s with no extend , 245s with extend!
-# N_ROBOTS = 25
+# N_ROBOTS = 20  # 5x5, 73s with 4As (and rly no extend), 75s with rly no extend, 90s with no extend , 245s with extend!
+N_ROBOTS = 25
 
 # 5: 2747526
 #10: 261627290
@@ -195,7 +196,6 @@ def arr_split(arr, sep):
     return arr_split_mult_sep(arr, sep, 4)
 
 
-# todo revert?
 @lru_cache(maxsize=None)
 def spath_dir_rec(code, n):
     if n == 0:
@@ -232,6 +232,19 @@ def spath_dir_rec(code, n):
     # arrs = spath_dir_rec("".join(whole_next_code), n-1)
     # return "".join(arrs)
     return arrs
+
+@lru_cache(maxsize=None)
+def spath_dir_rec_len(code, n) -> int:
+    if n == 0:
+        return len(code)
+
+    segments = arr_split(code, "A")
+
+    l = 0
+    for s in segments:
+        next_level_code = spath(s, is_dirpad=True)  # spath_dir(s) doesnt make sense, already split into segments!
+        l += spath_dir_rec_len(next_level_code, n-1)
+    return l
 
 def spath_dir_5(code):
     if code in d5:
@@ -364,10 +377,16 @@ def process_line_b_rec_mapping(line):
         # arrs = tuple(arrs)
 
     return len(arrs)*int(line[:-1])
+
+def process_line_b_rec_len(line):
+    arrs = spath(line, is_dirpad=False)
+    l = spath_dir_rec_len(arrs, N_ROBOTS)
+    return l*int(line[:-1])
 def process_line_b(line):
     # return process_line_b_by_lines(line)
     # return process_line_b_rec(line)
-    return process_line_b_rec_5(line)
+    # return process_line_b_rec_5(line)
+    return process_line_b_rec_len(line)
     # return process_line_b_rec_mapping(line)
 
 def sim_whole(arrs3):
