@@ -1,7 +1,7 @@
 # advent-of-code-solutions
 
-2023: 30 stars until 25 Dec (including) (1st in ADAM team) (python 3.8)
-2024: 48 stars until 25 Dec (including), 50 stars on 27th (2nd in ADAM team) (python 3.8)
+2023: 30 stars on 25 Dec (1st in ADAM team) (python 3.8)<br/>
+2024: 48 stars on 25 Dec, 50 stars on 27th (2nd in ADAM team) (python 3.8)
 
 Checklist to do before next year:
 * buy ideally all Xmas presents
