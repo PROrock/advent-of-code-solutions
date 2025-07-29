@@ -35,7 +35,7 @@ class Vect(NamedTuple):
 
     def l2_dist(self, other):
         result_vect = other - self
-        return math.hypot(result_vect)
+        return math.hypot(*result_vect)
 
 
 # grid
