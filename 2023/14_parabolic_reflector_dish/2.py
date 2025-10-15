@@ -86,6 +86,7 @@ def get_cycle_warmup_and_period(grid):
         new_grid = cycle_one_time(grid)
         if new_grid in grid_idx:
             print(f"cycle detected - From grid idx {grid_idx[grid]} to {grid_idx[new_grid]}")
+            # print(f"size grid_idx: {len(grid_idx)}. Grid idxs values: {list(grid_idx.values())}")
             return grid_idx[new_grid], grid_idx[grid] - grid_idx[new_grid] + 1
         else:
             grid_idx[new_grid] = len(grid_idx)
@@ -111,6 +112,7 @@ def get_final_grid(orig_grid):
 
 
 def compute_total_load(grid):
+    """Doesn't work here, because this also TILTS to North AND computes total load!"""
     s = 0
     transposed_grid = transpose_grid(grid)
     for line in transposed_grid:
@@ -119,12 +121,18 @@ def compute_total_load(grid):
         s += number
     return s
 
+def compute_total_load_2(grid):
+    s = 0
+    for i, line in enumerate(grid):
+        number = line.count(ROCK) * (len(grid) - i)
+        # print(number)
+        s += number
+    return s
+
 
 orig_grid = load_lines()
 final_grid = get_final_grid(orig_grid)
+# print_grid(final_grid)
 # assert [g for g, idx in grid_idx.items() if idx == final_idx][0] == final_grid
 
-print(compute_total_load(final_grid))
-# actual answer: 103
-# expected: 64 (pro 1)
-# a pak zmenit vstup (pro 2)
+print(compute_total_load_2(final_grid))
