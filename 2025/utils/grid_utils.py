@@ -101,7 +101,7 @@ ARR_TO_VECT = {
     "<": Vect(-1, 0),
 }
 VECT_TO_ARR = {v:a for a,v in ARR_TO_VECT.items()}
-
+EIGHT_NEIGHBOURHOOD = [Vect(x,y) for x in [-1,0,1] for y in [-1,0,1] if x != 0 or y != 0]
 
 # search, expand
 def expand(pos, grid, wall=WALL):
