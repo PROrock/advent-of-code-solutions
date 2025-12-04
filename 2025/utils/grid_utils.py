@@ -42,9 +42,14 @@ class Vect(NamedTuple):
 def load_grid_str(file):
     return Path(file).read_text().splitlines()
 
-
-def elem_at_pos(grid: List[Any], pos: Vect):
+def elem_at_pos(grid: List[Any], pos: Vect) -> Any:
     return grid[pos.y][pos.x]
+
+def set_elem_at_pos_str(grid: List[str], pos: Vect, value: str):
+    # grid[pos.y][pos.x] = value  # doesn't work because strings are immutable
+    # grid[pos.y][pos.x] = value  # doesn't work because strings are immutable
+    line = grid[pos.y]
+    grid[pos.y] = f"{line[:pos.x]}{value}{line[pos.x+1:]}"
 
 
 def inbounds(grid: List[Any], pos: Vect):
