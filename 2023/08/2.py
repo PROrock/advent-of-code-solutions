@@ -212,8 +212,6 @@ print(periods)
 
 print(smallest_common_multiplier(*periods))
 
-# 129655083671578319400 is too high
-# 10371555451871
 
 # def test_scm():
 #     assert smallest_common_multiplier_for_two(2, 6) == 6

@@ -138,7 +138,3 @@ start_d = Vect(0, -1)
 
 # print(n_of_visited(start_pos, start_d))
 print(n_of_loops(start_pos, start_d))
-
-# 6b: 1966 too high
-# 1891 too high
-# 1692 too low
