@@ -51,3 +51,10 @@ def argmax(iterable):
     return max(enumerate(iterable), key=lambda t:t[1])[0]
 def argmin(iterable):
     return min(enumerate(iterable), key=lambda t:t[1])[0]
+
+def signum(x):
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    return 0

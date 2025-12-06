@@ -15,6 +15,5 @@ TODOs:
 * delete my inputs
 * maybe rly have just examples in the code? and just file per day? or not
 * requirements and make sure u have numpy?
-* signum on 1 line in the fastest implementation?
 * rename 2023 days - add suffix with my short problem name
 * create Range/Interval class with operations (maybe even list of ranges) - would help in 2025-05, etc. but sorting helps a lot for these kinds of puzzles
