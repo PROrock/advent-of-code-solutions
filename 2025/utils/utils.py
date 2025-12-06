@@ -23,6 +23,7 @@ def gen_split_lines_by_empty_lines(lines):
             start_idx=i+1
     yield lines[start_idx:i+1]
 
+# delete this after 2026 if not used
 def split_iterable_by_sep(iterable, sep):
     prev_i = 0
     for i,c in enumerate(iterable):
@@ -31,6 +32,16 @@ def split_iterable_by_sep(iterable, sep):
             prev_i = i+1
 
     yield iterable[prev_i:i+1]  # commented, so I don't have to forget last yield (because A is always the last letter)
+
+def split_iterable_by_sep_v2(iterable, sep, include_sep=False):
+    prev_i = 0
+    for i,c in enumerate(iterable):
+        if c==sep:
+            end_index_offset = 1 if include_sep else 0
+            yield iterable[prev_i:i + end_index_offset]
+            prev_i = i+1
+
+    yield iterable[prev_i:i+include_sep]
 
 
 def ints(s):
