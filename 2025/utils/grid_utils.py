@@ -38,6 +38,30 @@ class Vect(NamedTuple):
         result_vect = other - self
         return math.hypot(*result_vect)
 
+class Vect3d(NamedTuple):
+    x: int
+    y: int
+    z: int
+
+    def invert(self):
+        return Vect3d(-self.x, -self.y, -self.z)
+
+    def __add__(self, other):
+        return Vect3d(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vect3d(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, multiplier):
+        return Vect3d(self.x * multiplier, self.y * multiplier, self.z * multiplier)
+
+    def l1_dist(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y) + abs(self.z - other.z)
+
+    def l2_dist(self, other):
+        result_vect = other - self
+        return math.hypot(*result_vect)
+
 
 # grid
 def load_grid_str(file):

@@ -17,3 +17,4 @@ TODOs:
 * requirements and make sure u have numpy?
 * rename 2023 days - add suffix with my short problem name
 * create Range/Interval class with operations (maybe even list of ranges) - would help in 2025-05, etc. but sorting helps a lot for these kinds of puzzles
+* 2025 08 - save Union(-find) algorithm

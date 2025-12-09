@@ -1,7 +1,8 @@
 # ideas to add:
 #  class Trie from 2024 day 19 (how to subclass dict?)
-
+import operator
 import re
+from functools import reduce
 
 INT_STR = "(-?\d+)"
 INT_PAT = re.compile(INT_STR)
@@ -21,6 +22,7 @@ def gen_split_lines_by_empty_lines(lines):
         if line == "":
             yield lines[start_idx:i]
             start_idx=i+1
+    # noinspection PyUnboundLocalVariable
     yield lines[start_idx:i+1]
 
 # delete this after 2026 if not used
@@ -31,6 +33,7 @@ def split_iterable_by_sep(iterable, sep):
             yield iterable[prev_i:i + 1]
             prev_i = i+1
 
+    # noinspection PyUnboundLocalVariable
     yield iterable[prev_i:i+1]  # commented, so I don't have to forget last yield (because A is always the last letter)
 
 def split_iterable_by_sep_v2(iterable, sep, include_sep=False):
@@ -41,6 +44,7 @@ def split_iterable_by_sep_v2(iterable, sep, include_sep=False):
             yield iterable[prev_i:i + end_index_offset]
             prev_i = i+1
 
+    # noinspection PyUnboundLocalVariable
     yield iterable[prev_i:i+include_sep]
 
 
@@ -58,3 +62,6 @@ def signum(x):
     if x < 0:
         return -1
     return 0
+
+def multiply(numbers):
+    return reduce(operator.mul, numbers)
