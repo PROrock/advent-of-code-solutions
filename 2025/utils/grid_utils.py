@@ -8,7 +8,7 @@ from dataclasses import field, dataclass
 from pathlib import Path
 from typing import NamedTuple, Any, List
 
-from utils.utils import replace_in_str_from
+from utils.utils import replace_in_str_from, signum
 
 WALL = "#"
 EMPTY = "."
@@ -37,6 +37,16 @@ class Vect(NamedTuple):
     def l2_dist(self, other):
         result_vect = other - self
         return math.hypot(*result_vect)
+
+    def l_inf_norm(self):
+        return max(abs(self.x), abs(self.y))
+
+    def normalize_to_signs(self):
+        return Vect(signum(self.x), signum(self.y))
+
+    def area_for_grid(self, other):
+        # beware of the plus one for grid!
+        return (abs(self.x - other.x)+1) * (abs(self.y - other.y)+1)
 
 class Vect3d(NamedTuple):
     x: int
@@ -69,6 +79,9 @@ def load_grid_str(file):
 
 def elem_at_pos(grid: List[Any], pos: Vect) -> Any:
     return grid[pos.y][pos.x]
+
+def set_elem_at_pos(grid: List[List[Any]], pos: Vect, value: Any):
+    grid[pos.y][pos.x] = value  # doesn't work because strings are immutable
 
 def set_elem_at_pos_str(grid: List[str], pos: Vect, value: str):
     # grid[pos.y][pos.x] = value  # doesn't work because strings are immutable
