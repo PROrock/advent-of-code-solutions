@@ -128,6 +128,26 @@ def find_all_in_grid_re(grid, char_):
 def transpose(grid):
     return list(zip(*grid))
 
+def reverse_lines_in_grid(grid):
+    return tuple([line[::-1] for line in grid])
+
+def rotate(grid, n_clockwise_quarter_turns=1):
+    match n_clockwise_quarter_turns:
+        case 0 | 4:
+            return grid
+        case 1:
+            return reverse_lines_in_grid(transpose(grid))
+        case 2:
+            return tuple(reverse_lines_in_grid(grid)[::-1])
+        case 3:
+            return tuple(transpose(reverse_lines_in_grid(grid)))
+        case _:
+            raise NotImplementedError(f"Not implemented, just use modulo, or check for negative, or FIXME. {n_clockwise_quarter_turns}")
+
+def flip(grid):
+    # return tuple(reverse_lines_in_grid(grid))  # y-axis flip
+    return tuple(grid[::-1])  # x-axis flip
+
 DIR_TO_VECT = {
     "N": Vect(0, -1),
     "E": Vect(1, 0),
