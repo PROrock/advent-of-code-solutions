@@ -46,15 +46,7 @@ def process_region(region):
     return 1 if fit(shapes, rgrid) else 0
 
 def fit(shapes, rgrid):
-    print("fit", shapes)
-    # for each shape
-    # for each instance
-    # for each flip/rotation
-    # for each position
-    # try to put in grid
-    # if not ok, try another position
-    # if ok, recursion to next
-
+    # print("fit", shapes)
     if sum(shapes) == 0:
         return True
 
@@ -64,20 +56,22 @@ def fit(shapes, rgrid):
     for j, rotation in enumerate(all_rotations[i_shape]):
         for y in range(len(rgrid) - len(rotation) + 1):
             for x in range(len(rgrid[0]) - len(rotation[0]) + 1):
-                print(f"Testing shape {i_shape} in rotation {j} to pos ({x}, {y}).")
+                # print(f"Testing shape {i_shape} in rotation {j} to pos ({x}, {y}).")
                 added = add_shape(rgrid, rotation, x, y, i_shape)
-                print("shaped added:", added)
-                print_grid(rgrid)
+                # print("shaped added:", added)
+                # print_grid(rgrid)
                 if added:
                     shapes[i_shape] -= 1
                     result = fit(shapes, rgrid)
                     if result:
+                        print("result")
                         print_grid(rgrid)
                         return True
                     shapes[i_shape] += 1
+                    rollback_the_grid_to_empty(rgrid, rotation, x, y, len(rotation[0]), len(rotation)-1)
 
-        print("rotation done")
-    print("Test done")
+        # print("rotation done")
+    # print("Test done")
     return False
 
 def add_shape(rgrid, rotation, x_offset, y_offset, i_shape):
@@ -96,7 +90,7 @@ def add_shape(rgrid, rotation, x_offset, y_offset, i_shape):
 
 def rollback_the_grid_to_empty(rgrid, rotation, x_offset, y_offset, max_x, max_y):
     for y in range(max_y+1):
-        for x in range((max_x)if y == max_y else len(rotation[0])):
+        for x in range(max_x if y == max_y else len(rotation[0])):
             if rotation[y][x] != EMPTY:
                 rgrid[y_offset + y][x_offset + x] = EMPTY
 
@@ -123,9 +117,7 @@ s = 0
 for region in regions:
     print(region)
     number = process_region(region)
-    # print(number)
+    print(number)
     s += number
-    # todo, just 1st test case
-    break
 
 print(s)
