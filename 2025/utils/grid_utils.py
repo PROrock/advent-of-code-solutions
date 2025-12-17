@@ -213,6 +213,10 @@ def fill_grid_str(grid, coors, value="O"):
         grid[c.y] = replace_in_str_from(grid[c.y], c.x, value)
     return grid
 
+def save_grid_to_file(grid, filename):
+    lines = ["".join([str(c) for c in line]) for line in grid]
+    Path(filename).write_text("\n".join(lines))
+    print(f"grid saved to file {filename}")
 
 @dataclass(order=True)
 class PrioritizedItem:

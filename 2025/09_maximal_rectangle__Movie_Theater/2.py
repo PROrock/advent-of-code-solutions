@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from utils.grid_utils import Vect, print_grid, set_elem_at_pos, elem_at_pos
+from utils.grid_utils import Vect, elem_at_pos, set_elem_at_pos_str
 from utils.utils import ints
 
 VALID_TILES = {"#", "X"}
@@ -20,9 +20,17 @@ points = [Vect(*ints(line)) for line in lines]
 width = max([p.x for p in points]) + 2
 height = max([p.y for p in points]) + 2
 print(width, height)
-# lists takes too long
-# grid = [list("."*width) for _ in range(height)]
-# grid = [["." for _ in range(width)] for _ in range(height)]
+
+# min_x and y saves like 1500 empty rows and columns
+min_x = min([p.x for p in points]) - 1
+min_y = min([p.y for p in points]) - 1
+width -= min_x
+height -= min_y
+v = Vect(min_x, min_y)
+points = [p-v for p in points]
+
+print(width, height)
+# lists takes too long, str is ok
 grid = ["."*width for _ in range(height)]
 print("grid")
 # todo here
@@ -32,8 +40,10 @@ print("grid")
 
 # points
 for p in points:
-    set_elem_at_pos(grid, p, "#")
-print_grid(grid)
+    set_elem_at_pos_str(grid, p, "#")
+print("# on grid")
+# print_grid(grid)
+# save_grid_to_file(grid[:1000], "10_2_grid_points.txt")
 
 # construct lines
 for a,b in zip(points, points[1:]+points[:1]):
@@ -43,9 +53,10 @@ for a,b in zip(points, points[1:]+points[:1]):
     p = a
     while p != b:
         p += dir
-        set_elem_at_pos(grid, p, "X")
-    set_elem_at_pos(grid, p, "#")
-print_grid(grid)
+        set_elem_at_pos_str(grid, p, "X")
+    set_elem_at_pos_str(grid, p, "#")
+print("X on grid")
+# print_grid(grid)
 
 # fill shape
 # # not working
@@ -64,22 +75,26 @@ print_grid(grid)
 #                 line[x] = "X"
 
 # fill shape
-# not working
-for line in grid:
+for y, line in enumerate(grid):
     inside = False
     last_was_wall = False
     inside_idx = None
     for x, c in enumerate(line):
         if c in VALID_TILES:
             if inside:
-                line[inside_idx:x] = list("X"*(x-inside_idx))
+                # line[inside_idx:x] = "X"*(x-inside_idx)
+                inside_str = "X"*(x-inside_idx)
+                line = f"{line[:inside_idx]}{inside_str}{line[x:]}"
             last_was_wall = True
         else:
             if last_was_wall:
                 inside = not inside
                 inside_idx = x
                 last_was_wall = False
-print_grid(grid)
+    grid[y] = line
+print("inside filled")
+# print_grid(grid)
+# i did this, but it's too much still, takes a lot of time to generate the inside in grid!
 
 
 # sort the points by y then x
